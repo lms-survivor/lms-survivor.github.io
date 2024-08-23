@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Last Man Standing - Picks Updated</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div id="branding">
+                <h1>Last Man Standing</h1>
+                <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
+            </div>
+        </div>
+    </header>
+
+    <section class="container">
+        <h2>Picks Updated</h2>
+        <p>Your picks for entry #<span id="entryId">12345</span> have been updated.</p>
+        <p>You will automatically be returned to the Home Page in <span id="countdown">5</span> seconds.</p>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Last Man Standing. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Simulate loading the entry ID
+        const entryId = 1002; // This should be dynamically set based on the updated entry
+        document.getElementById('entryId').textContent = entryId;
+
+        // Countdown to redirect back to the Home Page
+        let countdown = 5;
+        const countdownElement = document.getElementById('countdown');
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = countdown;
+            if (countdown === 0) {
+                clearInterval(countdownInterval);
+                window.location.href = 'home.html';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
