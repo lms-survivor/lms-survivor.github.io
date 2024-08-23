@@ -1,5 +1,11 @@
 // script.js
 
+function handleLogout() {
+    sessionStorage.clear();
+    window.location.href = 'index.html';
+}
+
+
 // Function to handle login form submission
 function handleLogin(event) {
     event.preventDefault();
