@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Last Man Standing - Registration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div id="branding">
+                <h1>Last Man Standing</h1>
+                <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
+            </div>
+        </div>
+    </header>
+
+    <section class="container">
+        <h2>Register for the Tournament</h2>
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" name="firstName" required>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last Name:</label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number:</label>
+                <input type="text" id="phoneNumber" name="phoneNumber" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="reason">Reason for Requesting to Join:</label>
+                <textarea id="reason" name="reason" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="entries">Number of Entries (1-50):</label>
+                <input type="number" id="entries" name="entries" required min="1" max="50">
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Submit Registration">
+            </div>
+        </form>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Last Man Standing. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
