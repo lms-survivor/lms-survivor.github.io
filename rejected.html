@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Last Man Standing - Registration Rejected</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div id="branding">
+                <h1>Last Man Standing</h1>
+                <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
+            </div>
+        </div>
+    </header>
+
+    <section class="container">
+        <h2>Registration Rejected</h2>
+        <p>Your registration request has been rejected and you are not eligible to join the tournament.</p>
+        <p>If you would like further explanation, please contact us using the form below.</p>
+        
+        <form id="rejectedInquiryForm">
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" value="" required readonly>
+            </div>
+            <div class="form-group">
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" required></textarea>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Submit">
+            </div>
+        </form>
+
+        <p id="confirmationMessage" class="hidden">Thank you for reaching out. We will contact you shortly.</p>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Last Man Standing. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Simulate loading the email from the login attempt
+        const email = "canovalik@gmail.com"; // This should be dynamically set based on the rejected email
+        document.getElementById('email').value = email;
+
+        // Handle the rejected inquiry form submission
+        document.getElementById('rejectedInquiryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const message = document.getElementById('message').value;
+
+            // Create payload for Flow 4
+            const payload = {
+                email: email,
+                message: message
+            };
+
+            // Send HTTP request to Flow 4
+            fetch('https://your-flow-url-here.com', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('rejectedInquiryForm').classList.add('hidden');
+                document.getElementById('confirmationMessage').classList.remove('hidden');
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
