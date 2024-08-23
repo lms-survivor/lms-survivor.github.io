@@ -5,43 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Last Man Standing - Picks Updated</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
+    <script>
+        // Automatically redirect to Home Page after 5 seconds
+        setTimeout(function() {
+            window.location.href = 'home.html';
+        }, 5000);
+    </script>
 </head>
 <body>
+
     <header>
-        <div class="container">
-            <div id="branding">
-                <h1>Last Man Standing</h1>
-                <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
-            </div>
-        </div>
+        <h1>Last Man Standing</h1>
+        <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
     </header>
 
-    <section class="container">
-        <h2>Picks Updated</h2>
-        <p>Your picks for entry #<span id="entryId">12345</span> have been updated.</p>
-        <p>You will automatically be returned to the Home Page in <span id="countdown">5</span> seconds.</p>
-    </section>
+    <div class="container">
+        <h2>Your picks have been updated!</h2>
+        <p>You will be automatically redirected to the Home Page in a few seconds...</p>
+        <p>If you are not redirected, <a href="home.html">click here</a>.</p>
+    </div>
 
     <footer>
-        <p>&copy; 2024 Last Man Standing. All rights reserved.</p>
+        <p>&copy; 2024 Last Man Standing. All Rights Reserved.</p>
     </footer>
 
-    <script>
-        // Simulate loading the entry ID
-        const entryId = 1002; // This should be dynamically set based on the updated entry
-        document.getElementById('entryId').textContent = entryId;
-
-        // Countdown to redirect back to the Home Page
-        let countdown = 5;
-        const countdownElement = document.getElementById('countdown');
-        const countdownInterval = setInterval(() => {
-            countdown--;
-            countdownElement.textContent = countdown;
-            if (countdown === 0) {
-                clearInterval(countdownInterval);
-                window.location.href = 'home.html';
-            }
-        }, 1000);
-    </script>
 </body>
 </html>
