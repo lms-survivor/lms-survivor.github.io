@@ -5,153 +5,154 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Last Man Standing - Home</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
 </head>
-<body>
+<body onload="checkAccess()">
+
     <header>
-        <div class="container">
-            <div id="branding">
-                <h1>Last Man Standing</h1>
-                <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
-            </div>
-        </div>
+        <h1>Last Man Standing</h1>
+        <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
     </header>
 
-    <section class="container">
-        <h2>Welcome, <span id="userName">User</span></h2>
+    <div class="container">
+        <h2>Welcome, <span id="userName"></span>!</h2>
+        
+        <!-- User Profile Information -->
+        <section>
+            <h3>Your Profile</h3>
+            <p><strong>Email:</strong> <span id="userEmail"></span></p>
+            <p><strong>Phone Number:</strong> <span id="userPhone"></span></p>
+        </section>
 
-        <div class="profile-section">
-            <h3>Your Profile Information</h3>
-            <p><strong>First Name:</strong> <span id="firstName"></span></p>
-            <p><strong>Last Name:</strong> <span id="lastName"></span></p>
-            <p><strong>Email Address:</strong> <span id="emailAddress"></span></p>
-            <p><strong>Phone Number:</strong> <span id="phoneNumber"></span></p>
-        </div>
-
-        <div class="entries-section">
+        <!-- Pool Entries -->
+        <section>
             <h3>Your Pool Entries</h3>
             <table>
                 <thead>
                     <tr>
                         <th>Entry Name</th>
-                        <th>Paid in Full</th>
                         <th>Status</th>
-                        <th>Manage Picks</th>
+                        <th>Paid in Full</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="entriesTableBody">
-                    <!-- Entries will be dynamically inserted here -->
+                    <!-- Pool Entries will be dynamically loaded here -->
                 </tbody>
             </table>
-        </div>
-    </section>
+        </section>
+    </div>
 
-    <!-- Hidden form for managing picks -->
-    <div id="entryForm" class="hidden">
-        <h3>Manage Your Picks</h3>
-        <form id="managePicksForm">
-            <!-- Weekly pick fields will be dynamically inserted here -->
-            <div class="form-group">
-                <input type="submit" value="Update Picks">
-            </div>
-        </form>
+    <!-- Modal for editing/viewing picks -->
+    <div id="picksModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Edit Your Picks</h2>
+            <form id="picksForm">
+                <!-- Weekly picks will be dynamically generated here -->
+            </form>
+        </div>
     </div>
 
     <footer>
-        <p>&copy; 2024 Last Man Standing. All rights reserved.</p>
+        <p>&copy; 2024 Last Man Standing. All Rights Reserved.</p>
     </footer>
 
-    <script src="script.js"></script>
     <script>
-        // Simulating loading data from the login response (Json 1 example)
-        const userData = {
-            firstName: "Kevin",
-            lastName: "Canovali",
-            emailAddress: "canovalik@gmail.com",
-            phoneNumber: "412-610-5559",
-            poolEntries: [
-                {
-                    lms_display_name: "PGHSouth: KCANOVALI-1002",
-                    paid_in_full: true,
-                    disqualified: false,
-                    dvuid: 1002
-                },
-                {
-                    lms_display_name: "PGHSouth: KCANOVALI-1003",
-                    paid_in_full: true,
-                    disqualified: true,
-                    dvuid: 1003
-                }
-            ]
-        };
+        // Load user data from session storage
+        document.getElementById('userName').innerText = sessionStorage.getItem('first_name') + ' ' + sessionStorage.getItem('last_name');
+        document.getElementById('userEmail').innerText = sessionStorage.getItem('email');
+        document.getElementById('userPhone').innerText = sessionStorage.getItem('phone');
 
-        // Populate the user profile information
-        document.getElementById('userName').textContent = userData.firstName;
-        document.getElementById('firstName').textContent = userData.firstName;
-        document.getElementById('lastName').textContent = userData.lastName;
-        document.getElementById('emailAddress').textContent = userData.emailAddress;
-        document.getElementById('phoneNumber').textContent = userData.phoneNumber;
-
-        // Populate the entries table
+        // Load pool entries from session storage
+        const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
         const entriesTableBody = document.getElementById('entriesTableBody');
-        userData.poolEntries.forEach(entry => {
+
+        poolEntries.forEach(entry => {
             const row = document.createElement('tr');
 
             const entryNameCell = document.createElement('td');
             entryNameCell.textContent = entry.lms_display_name;
             row.appendChild(entryNameCell);
 
-            const paidCell = document.createElement('td');
-            paidCell.textContent = entry.paid_in_full ? 'Yes' : 'No';
-            row.appendChild(paidCell);
-
             const statusCell = document.createElement('td');
             statusCell.textContent = entry.disqualified ? 'Disqualified' : 'Active';
             row.appendChild(statusCell);
 
-            const manageCell = document.createElement('td');
-            const manageButton = document.createElement('button');
-            manageButton.textContent = entry.disqualified ? 'View' : 'Edit';
-            manageButton.classList.add('edit-entry-btn');
-            manageButton.setAttribute('data-entry-id', entry.dvuid);
-            manageButton.setAttribute('data-entry', JSON.stringify(entry));
-            manageCell.appendChild(manageButton);
-            row.appendChild(manageCell);
+            const paidCell = document.createElement('td');
+            paidCell.textContent = entry.paid_in_full ? 'Yes' : 'No';
+            row.appendChild(paidCell);
+
+            const actionCell = document.createElement('td');
+            const actionButton = document.createElement('button');
+            actionButton.textContent = entry.disqualified ? 'View' : 'Edit';
+            actionButton.onclick = () => openModal(entry.dvuid, entry.disqualified);
+            actionCell.appendChild(actionButton);
+            row.appendChild(actionCell);
 
             entriesTableBody.appendChild(row);
-
-            // Add event listener to the manage button
-            manageButton.addEventListener('click', () => {
-                showPopup(entry);
-            });
         });
 
-        // Function to show the popup
-        function showPopup(entry) {
-            const entryForm = document.getElementById('entryForm');
-            entryForm.classList.remove('hidden');
-            
-            // Clear any existing fields
-            const form = document.getElementById('managePicksForm');
+        // Open the modal for editing/viewing picks
+        function openModal(entryId, isDisqualified) {
+            const modal = document.getElementById('picksModal');
+            const form = document.getElementById('picksForm');
+
+            // Clear previous form fields
             form.innerHTML = '';
 
-            // Populate form fields based on the entry
-            for (let i = 1; i <= 17; i++) {
-                const weekPickField = document.createElement('div');
-                weekPickField.classList.add('form-group');
-                weekPickField.innerHTML = `
-                    <label for="week${i}">Week ${i} Pick:</label>
-                    <input type="text" id="week${i}" name="week${i}" value="${entry[`week${i}Pick`] || ''}">
-                `;
-                form.appendChild(weekPickField);
+            const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
+            const entry = poolEntries.find(e => e.dvuid === entryId);
+
+            if (entry) {
+                entry.weeks.forEach(week => {
+                    const label = document.createElement('label');
+                    label.textContent = `Week ${week.week_no}`;
+                    form.appendChild(label);
+
+                    const select = document.createElement('select');
+                    select.id = `week${week.week_no}`;
+                    select.disabled = week.locked || isDisqualified;
+
+                    const teamOptions = JSON.parse(sessionStorage.getItem('team_options'));
+
+                    teamOptions.forEach(team => {
+                        const option = document.createElement('option');
+                        option.value = team;
+                        option.textContent = team;
+                        if (team === week.selection) {
+                            option.selected = true;
+                        }
+                        select.appendChild(option);
+                    });
+
+                    form.appendChild(select);
+                    form.appendChild(document.createElement('br'));
+                });
+
+                if (!isDisqualified) {
+                    const submitButton = document.createElement('button');
+                    submitButton.type = 'submit';
+                    submitButton.textContent = 'Update Picks';
+                    submitButton.onclick = (event) => handlePicksSubmission(event, entry.dvuid);
+                    form.appendChild(submitButton);
+                }
             }
 
-            // Add the submit button
-            const submitButton = document.createElement('input');
-            submitButton.type = 'submit';
-            submitButton.value = 'Update Picks';
-            form.appendChild(submitButton);
+            modal.style.display = 'block';
+        }
 
-            // Optionally, you can add logic here to handle form submission
+        // Close the modal
+        function closeModal() {
+            document.getElementById('picksModal').style.display = 'none';
+        }
+
+        // Ensure the modal closes when the user clicks outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('picksModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
         }
     </script>
 </body>
