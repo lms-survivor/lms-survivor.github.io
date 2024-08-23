@@ -91,65 +91,68 @@
         document.getElementById('emailAddress').textContent = userData.emailAddress;
         document.getElementById('phoneNumber').textContent = userData.phoneNumber;
 
-// After populating the entries table
-userData.poolEntries.forEach(entry => {
-    const row = document.createElement('tr');
+        // Populate the entries table
+        const entriesTableBody = document.getElementById('entriesTableBody');
+        userData.poolEntries.forEach(entry => {
+            const row = document.createElement('tr');
 
-    const entryNameCell = document.createElement('td');
-    entryNameCell.textContent = entry.lms_display_name;
-    row.appendChild(entryNameCell);
+            const entryNameCell = document.createElement('td');
+            entryNameCell.textContent = entry.lms_display_name;
+            row.appendChild(entryNameCell);
 
-    const paidCell = document.createElement('td');
-    paidCell.textContent = entry.paid_in_full ? 'Yes' : 'No';
-    row.appendChild(paidCell);
+            const paidCell = document.createElement('td');
+            paidCell.textContent = entry.paid_in_full ? 'Yes' : 'No';
+            row.appendChild(paidCell);
 
-    const statusCell = document.createElement('td');
-    statusCell.textContent = entry.disqualified ? 'Disqualified' : 'Active';
-    row.appendChild(statusCell);
+            const statusCell = document.createElement('td');
+            statusCell.textContent = entry.disqualified ? 'Disqualified' : 'Active';
+            row.appendChild(statusCell);
 
-    const manageCell = document.createElement('td');
-    const manageButton = document.createElement('button');
-    manageButton.textContent = entry.disqualified ? 'View' : 'Edit';
-    manageButton.classList.add('edit-entry-btn');
-    manageButton.setAttribute('data-entry-id', entry.dvuid);
-    manageButton.setAttribute('data-entry', JSON.stringify(entry));
-    manageCell.appendChild(manageButton);
-    row.appendChild(manageCell);
+            const manageCell = document.createElement('td');
+            const manageButton = document.createElement('button');
+            manageButton.textContent = entry.disqualified ? 'View' : 'Edit';
+            manageButton.classList.add('edit-entry-btn');
+            manageButton.setAttribute('data-entry-id', entry.dvuid);
+            manageButton.setAttribute('data-entry', JSON.stringify(entry));
+            manageCell.appendChild(manageButton);
+            row.appendChild(manageCell);
 
-    entriesTableBody.appendChild(row);
+            entriesTableBody.appendChild(row);
 
-    // Add event listener to the manage button
-    manageButton.addEventListener('click', () => {
-        showPopup(entry);
-    });
-});
+            // Add event listener to the manage button
+            manageButton.addEventListener('click', () => {
+                showPopup(entry);
+            });
+        });
 
-// Function to show the popup
-function showPopup(entry) {
-    const entryForm = document.getElementById('entryForm');
-    entryForm.classList.remove('hidden');
-    
-    // Clear any existing fields
-    const form = document.getElementById('managePicksForm');
-    form.innerHTML = '';
+        // Function to show the popup
+        function showPopup(entry) {
+            const entryForm = document.getElementById('entryForm');
+            entryForm.classList.remove('hidden');
+            
+            // Clear any existing fields
+            const form = document.getElementById('managePicksForm');
+            form.innerHTML = '';
 
-    // Populate form fields based on the entry
-    for (let i = 1; i <= 17; i++) {
-        const weekPickField = document.createElement('div');
-        weekPickField.classList.add('form-group');
-        weekPickField.innerHTML = `
-            <label for="week${i}">Week ${i} Pick:</label>
-            <input type="text" id="week${i}" name="week${i}" value="${entry[`week${i}Pick`] || ''}">
-        `;
-        form.appendChild(weekPickField);
-    }
+            // Populate form fields based on the entry
+            for (let i = 1; i <= 17; i++) {
+                const weekPickField = document.createElement('div');
+                weekPickField.classList.add('form-group');
+                weekPickField.innerHTML = `
+                    <label for="week${i}">Week ${i} Pick:</label>
+                    <input type="text" id="week${i}" name="week${i}" value="${entry[`week${i}Pick`] || ''}">
+                `;
+                form.appendChild(weekPickField);
+            }
 
-    // Add the submit button
-    const submitButton = document.createElement('input');
-    submitButton.type = 'submit';
-    submitButton.value = 'Update Picks';
-    form.appendChild(submitButton);        
-        
+            // Add the submit button
+            const submitButton = document.createElement('input');
+            submitButton.type = 'submit';
+            submitButton.value = 'Update Picks';
+            form.appendChild(submitButton);
+
+            // Optionally, you can add logic here to handle form submission
+        }
     </script>
 </body>
 </html>
