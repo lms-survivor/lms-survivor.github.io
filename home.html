@@ -22,7 +22,6 @@
             <h3>Your Profile</h3>
             <p><strong>Email:</strong> <span id="userEmail"></span></p>
             <p><strong>Phone Number:</strong> <span id="userPhone"></span></p>
-            <button onclick="handleLogout()">Logout</button>
         </section>
 
         <!-- Pool Entries -->
@@ -135,8 +134,10 @@
                     const submitButton = document.createElement('button');
                     submitButton.type = 'submit';
                     submitButton.textContent = 'Update Picks';
-                    submitButton.onclick = (event) => handlePicksSubmission(event, entry.dvuid);
                     form.appendChild(submitButton);
+
+                    // Attach event listener to form submit
+                    form.addEventListener('submit', (event) => handlePicksSubmission(event, entry.dvuid));
                 }
             }
 
