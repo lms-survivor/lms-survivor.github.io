@@ -6,6 +6,13 @@ function handleLogout() {
 }
 
 
+document.getElementById('loading').style.display = 'block';
+// After fetch completes:
+document.getElementById('loading').style.display = 'none';
+
+
+
+
 // Function to handle login form submission
 function handleLogin(event) {
     event.preventDefault();
