@@ -210,7 +210,20 @@ function checkAccess() {
     }
 }
 
+// Function to handle the sign-out process
+function handleSignOut() {
+    // Clear session storage to remove user data
+    sessionStorage.clear();
+
+    // Redirect the user to the login page
+    window.location.href = 'index.html';
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+    const signOutButton = document.getElementById('signOutButton');
+    if (signOutButton) {
+        signOutButton.addEventListener('click', handleSignOut);
+    }
     if (window.location.pathname === '/index.html') {
         document.getElementById('loginForm').addEventListener('submit', handleLogin);
     }
