@@ -27,7 +27,7 @@ function handleLogin(event) {
     };
 
     // Replace with your actual Flow 1 URL
-    const url = "https://YOUR_FLOW_1_URL_HERE";
+    const url = "https://prod-178.westus.logic.azure.com:443/workflows/e6d212ed6f314eefb720808db7116632/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gYdb3GZbZ9xlpdHaJoHkT6gBzNmtJGM6wI1GApAXJR8";
 
     fetch(url, {
         method: 'POST',
@@ -38,10 +38,10 @@ function handleLogin(event) {
     })
     .then(response => response.json())
     .then(data => {
-        sessionStorage.setItem('email', data.email);
+        sessionStorage.setItem('email', data.email_address);
         sessionStorage.setItem('first_name', data.first_name);
         sessionStorage.setItem('last_name', data.last_name);
-        sessionStorage.setItem('phone', data.phone);
+        sessionStorage.setItem('phone', data.phone_number);
         sessionStorage.setItem('pool_entries', JSON.stringify(data.pool_entries));
         sessionStorage.setItem('team_options', JSON.stringify(data.team_options));
 
@@ -81,7 +81,7 @@ function handleRegistration(event) {
     };
 
     // Replace with your actual Flow 2 URL
-    const url = "https://YOUR_FLOW_2_URL_HERE";
+    const url = "https://prod-118.westus.logic.azure.com:443/workflows/2ab06ffb729f45378f8b57babe641c9c/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=xSigySGrFPvepNWslKyrhLlzw8B7JpcyNTQzmF2F85Q";
 
     fetch(url, {
         method: 'POST',
@@ -125,16 +125,15 @@ function handlePicksSubmission(event, entryId) {
 
     // JSON payload for Flow 3
     const payload = {
-        "email": sessionStorage.getItem('email'),
+        "email_address": sessionStorage.getItem('email'),
         "first_name": sessionStorage.getItem('first_name'),
         "last_name": sessionStorage.getItem('last_name'),
-        "phone": sessionStorage.getItem('phone'),
-        "pool_entries": poolEntries,
-        "team_options": JSON.parse(sessionStorage.getItem('team_options'))
+        "phone_number": sessionStorage.getItem('phone'),
+        "pool_entries": poolEntries
     };
 
     // Replace with your actual Flow 3 URL
-    const url = "https://YOUR_FLOW_3_URL_HERE";
+    const url = "https://prod-146.westus.logic.azure.com:443/workflows/ea98804653da4ba1b279e4807c41de7c/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=-GnfPQCEtYq4s5taQ5x8uwm1NwCSrL-wRWzPmTfaAWs";
 
     fetch(url, {
         method: 'POST',
@@ -165,7 +164,7 @@ function handleRejectedInquiry(event) {
     };
 
     // Replace with your actual Flow 4 URL
-    const url = "https://YOUR_FLOW_4_URL_HERE";
+    const url = "https://prod-135.westus.logic.azure.com:443/workflows/f37114c9ca8f46c9bf2e026a93b69017/triggers/manual/paths/invoke?api-version=2016-06-01";
 
     fetch(url, {
         method: 'POST',
