@@ -122,56 +122,59 @@
             entriesTableBody.appendChild(row);
         });
 
-        // Open the modal for editing/viewing picks
-        function openModal(entryId, isDisqualified) {
-            const modal = document.getElementById('picksModal');
-            const form = document.getElementById('picksForm');
+// Open the modal for editing/viewing picks
+function openModal(entryId, isDisqualified) {
+    const modal = document.getElementById('picksModal');
+    const form = document.getElementById('picksForm');
 
-            // Clear previous form fields
-            form.innerHTML = '';
+    // Clear previous form fields
+    form.innerHTML = '';
 
-            const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
-            const entry = poolEntries.find(e => e.dvuid === entryId);
+    const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
+    const entry = poolEntries.find(e => e.dvuid === entryId);
 
-            if (entry) {
-                entry.weeks.forEach(week => {
-                    const label = document.createElement('label');
-                    label.textContent = `Week ${week.week_no}`;
-                    form.appendChild(label);
+    if (entry) {
+        entry.weeks.forEach(week => {
+            const label = document.createElement('label');
+            label.textContent = `Week ${week.week_no}`;
+            form.appendChild(label);
 
-                    const select = document.createElement('select');
-                    select.id = `week${week.week_no}`;
-                    select.disabled = week.locked || isDisqualified;
+            const select = document.createElement('select');
+            select.id = `week${week.week_no}`;
+            select.disabled = week.locked || isDisqualified;
 
-                    const teamOptions = JSON.parse(sessionStorage.getItem('team_options'));
+            const teamOptions = JSON.parse(sessionStorage.getItem('team_options'));
 
-                    teamOptions.forEach(team => {
-                        const option = document.createElement('option');
-                        option.value = team;
-                        option.textContent = team;
-                        if (team === week.selection) {
-                            option.selected = true;
-                        }
-                        select.appendChild(option);
-                    });
-
-                    form.appendChild(select);
-                    form.appendChild(document.createElement('br'));
-                });
-
-                if (!isDisqualified) {
-                    const submitButton = document.createElement('button');
-                    submitButton.type = 'submit';
-                    submitButton.textContent = 'Update Picks';
-                    form.appendChild(submitButton);
-
-                    // Attach event listener to form submit
-                    form.addEventListener('submit', (event) => handlePicksSubmission(event, entry.dvuid));
+            teamOptions.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team;
+                option.textContent = team;
+                if (team === week.selection) {
+                    option.selected = true;
                 }
-            }
+                select.appendChild(option);
+            });
 
-            modal.style.display = 'block';
+            form.appendChild(select);
+            form.appendChild(document.createElement('br'));
+        });
+
+        if (!isDisqualified) {
+            const submitButton = document.createElement('button');
+            submitButton.type = 'submit';
+            submitButton.textContent = 'Update Picks';
+            form.appendChild(submitButton);
+
+            // Detach any previous event listener to avoid duplication
+            form.removeEventListener('submit', handlePicksSubmission);
+
+            // Attach the event listener to form submit
+            form.addEventListener('submit', (event) => handlePicksSubmission(event, entry.dvuid));
         }
+    }
+
+    modal.style.display = 'block';
+}
 
         // Close the modal
         function closeModal() {
