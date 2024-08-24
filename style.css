@@ -5,7 +5,8 @@
     box-sizing: border-box;
     font-family: 'Arial', sans-serif;
 }
-.sign-out-button {
+
+/*.sign-out-button {
     background-color: #dc3545;
     color: white;
     padding: 10px 20px;
@@ -19,6 +20,8 @@
 .sign-out-button:hover {
     background-color: #c82333;
 }
+*/
+
 
 body {
     background-color: #f4f4f4;
@@ -27,8 +30,9 @@ body {
     padding: 20px;
 }
 
+
 /* Header */
-header {
+/*header {
     background-color: #282c34;
     color: white;
     padding: 10px 0;
@@ -36,6 +40,40 @@ header {
     margin-bottom: 20px;
     border-radius: 5px;
 }
+*/
+
+
+/* Header */
+header {
+    background-color: #282c34;
+    color: white;
+    padding: 10px 20px; /* Add padding to allow space for the button */
+    text-align: left; /* Change from center to left alignment for the header content */
+    margin-bottom: 20px;
+    border-radius: 5px;
+    position: relative; /* Enable positioning of child elements */
+}
+
+/* Sign-Out Button */
+.sign-out-button {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    position: absolute; /* Position the button absolutely within the header */
+    right: 20px; /* Align it to the right side of the header */
+    top: 50%; /* Align it vertically within the header */
+    transform: translateY(-50%); /* Center it vertically */
+}
+
+.sign-out-button:hover {
+    background-color: #c82333;
+}
+
+
 
 header h1 {
     margin: 0;
