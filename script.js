@@ -17,6 +17,9 @@ document.getElementById('loading').style.display = 'none';
 function handleLogin(event) {
     event.preventDefault();
 
+    // Show loader
+    document.getElementById('loading').style.display = 'block';
+
     const email = document.getElementById('email').value;
     const pin = document.getElementById('pin').value;
 
@@ -37,6 +40,8 @@ function handleLogin(event) {
         body: JSON.stringify(payload)
     })
     .then(response => {
+        // Hide loader
+        document.getElementById('loading').style.display = 'none';
     if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -61,7 +66,11 @@ function handleLogin(event) {
             window.location.href = 'invalid.html';
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        // Hide loader on error
+        document.getElementById('loading').style.display = 'none';
+        console.error('Error:', error);
+    });
 }
 
 // Function to handle registration form submission
