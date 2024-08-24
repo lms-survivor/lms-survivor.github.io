@@ -10,7 +10,7 @@
 <body>
 
     <header>
-        <h1>3Last Man Standing</h1>
+        <h1>1Last Man Standing</h1>
         <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
     </header>
 
@@ -35,10 +35,56 @@
     </footer>
 
     <script>
-        // Attach the handleLogin function to the form's submit event
-        document.getElementById('loginForm').addEventListener('submit', handleLogin);
+function handleLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const pin = document.getElementById('pin').value;
+
+    // JSON payload for Flow 1
+    const payload = {
+        "email": email,
+        "pin": pin
+    };
+
+    // Replace with your actual Flow 1 URL
+    const url = "https://prod-178.westus.logic.azure.com:443/workflows/e6d212ed6f314eefb720808db7116632/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gYdb3GZbZ9xlpdHaJoHkT6gBzNmtJGM6wI1GApAXJR8";
+                 
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+})
+    .then(data => {
+        sessionStorage.setItem('email', data.email_address);
+        sessionStorage.setItem('first_name', data.first_name);
+        sessionStorage.setItem('last_name', data.last_name);
+        sessionStorage.setItem('phone', data.phone_number);
+        sessionStorage.setItem('pool_entries', JSON.stringify(data.pool_entries));
+        sessionStorage.setItem('team_options', JSON.stringify(data.team_options));
+
+        if (data.approved_status === 'approved') {
+            sessionStorage.setItem('approved', 'true');
+            window.location.href = 'home.html';
+        } else if (data.approved_status === 'pending') {
+            window.location.href = 'pending.html';
+        } else if (data.approved_status === 'rejected') {
+            window.location.href = 'rejected.html';
+        } else {
+            window.location.href = 'invalid.html';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
     </script>
-    <script src="script.js"></script>
 
 </body>
 </html>
