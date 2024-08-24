@@ -28,7 +28,7 @@ function handleLogin(event) {
 
     // Replace with your actual Flow 1 URL
     const url = "https://prod-178.westus.logic.azure.com:443/workflows/e6d212ed6f314eefb720808db7116632/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gYdb3GZbZ9xlpdHaJoHkT6gBzNmtJGM6wI1GApAXJR8";
-
+                 
     fetch(url, {
         method: 'POST',
         headers: {
@@ -36,7 +36,12 @@ function handleLogin(event) {
         },
         body: JSON.stringify(payload)
     })
-    .then(response => response.json())
+    .then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+})
     .then(data => {
         sessionStorage.setItem('email', data.email_address);
         sessionStorage.setItem('first_name', data.first_name);
