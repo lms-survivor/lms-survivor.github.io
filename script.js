@@ -72,6 +72,9 @@ function handleLogin(event) {
 function handleRegistration(event) {
     event.preventDefault();
 
+    // Show loader
+    document.getElementById('loading').style.display = 'block';
+
     const firstName = document.getElementById('first_name').value;
     const lastName = document.getElementById('last_name').value;
     const phone = document.getElementById('phone').value;
@@ -99,7 +102,14 @@ function handleRegistration(event) {
         },
         body: JSON.stringify(payload)
     })
-    .then(response => response.json())
+    .then(response => {
+        // Hide loader
+        document.getElementById('loading').style.display = 'none';
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+})
     .then(data => {
         if (data.inquiry_status === 'submitted') {
             window.location.href = 'registration.html';
@@ -109,7 +119,11 @@ function handleRegistration(event) {
             window.location.href = 'existing.html';
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        // Hide loader on error
+        document.getElementById('loading').style.display = 'none';
+        console.error('Error:', error);
+    });
 }
 
 // Function to handle pick management (Form 3)
