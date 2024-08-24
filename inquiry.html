@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Last Man Standing - Registration</title>
     <link rel="stylesheet" href="style.css">
-    <script defer src="script.js"></script>
+    
 </head>
 <body>
 
@@ -46,10 +46,15 @@
         <p>&copy; 2024 Last Man Standing. All Rights Reserved.</p>
     </footer>
 
+    <script src="script.js"></script>
     <script>
         // Attach the handleRegistration function to the form's submit event
         document.getElementById('registrationForm').addEventListener('submit', handleRegistration);
     </script>
+<div id="loading" style="display:none;">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+</div>
 
 </body>
 </html>
