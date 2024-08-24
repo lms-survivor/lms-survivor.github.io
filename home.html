@@ -6,11 +6,24 @@
     <title>Last Man Standing - Home</title>
     <link rel="stylesheet" href="style.css">
     <script defer src="script.js"></script>
+    <script>
+        // Function to check if the user is logged in
+        function checkIfLoggedIn() {
+            const isLoggedIn = sessionStorage.getItem('approved') === 'true';
+            if (!isLoggedIn) {
+                // If the user is not logged in, redirect them to the login page
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Run the check when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', checkIfLoggedIn);
+    </script>
 </head>
 <body onload="checkAccess()">
 
     <header>
-        <h1>111 Last Man Standing</h1>
+        <h1>333 Last Man Standing</h1>
         <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
     <button id="signOutButton" class="sign-out-button">Sign Out</button>
     </header>
