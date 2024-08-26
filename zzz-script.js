@@ -71,6 +71,12 @@ function handleLogin(event) {
     });
 }
 
+
+
+
+
+
+
 // Function to handle registration form submission
 function handleRegistration(event) {
     event.preventDefault();
@@ -132,6 +138,12 @@ function handleRegistration(event) {
     });
 }
 
+
+
+
+
+
+
 // Function to handle pick management (Form 3)
 function handlePicksSubmission(event, entryId) {
     event.preventDefault();
@@ -181,6 +193,20 @@ function handlePicksSubmission(event, entryId) {
     })
     .catch(error => console.error('Error:', error));
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Function to handle rejected inquiry submission (Form 4)
 function handleRejectedInquiry(event) {
