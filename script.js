@@ -13,6 +13,7 @@ function handleLogin(event) {
     event.preventDefault();
 
     // Show loader
+    document.getElementById('overlay').style.display = 'block';
     document.getElementById('loading').style.display = 'block';
 
     const email = document.getElementById('email').value;
@@ -36,6 +37,7 @@ function handleLogin(event) {
     })
     .then(response => {
         // Hide loader
+        document.getElementById('overlay').style.display = 'none';
         document.getElementById('loading').style.display = 'none';
     if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -63,6 +65,7 @@ function handleLogin(event) {
     })
     .catch(error => {
         // Hide loader on error
+        document.getElementById('overlay').style.display = 'none';
         document.getElementById('loading').style.display = 'none';
         console.error('Error:', error);
     });
@@ -73,6 +76,7 @@ function handleRegistration(event) {
     event.preventDefault();
 
     // Show loader
+    document.getElementById('overlay').style.display = 'block';
     document.getElementById('loading').style.display = 'block';
 
     const firstName = document.getElementById('first_name').value;
@@ -104,6 +108,7 @@ function handleRegistration(event) {
     })
     .then(response => {
         // Hide loader
+        document.getElementById('overlay').style.display = 'none';
         document.getElementById('loading').style.display = 'none';
     if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -121,6 +126,7 @@ function handleRegistration(event) {
     })
     .catch(error => {
         // Hide loader on error
+        document.getElementById('overlay').style.display = 'none';
         document.getElementById('loading').style.display = 'none';
         console.error('Error:', error);
     });
