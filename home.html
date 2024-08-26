@@ -170,7 +170,24 @@
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-            // Handle the response if needed
+            // If the response is successful, show the success message and disable the button
+            const submitButton = document.querySelector(`#week${weekNo} ~ button`);
+            const successMessage = document.createElement('span');
+            successMessage.textContent = "Successfully Updated";
+            successMessage.style.color = 'green';
+            successMessage.style.marginLeft = '10px';
+
+            // Disable the button
+            submitButton.disabled = true;
+
+            // Remove any existing success messages
+            const existingMessage = submitButton.nextElementSibling;
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            // Append the new success message
+            submitButton.insertAdjacentElement('afterend', successMessage);
         })
         .catch(error => console.error('Error:', error));
     }
