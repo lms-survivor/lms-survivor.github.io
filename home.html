@@ -223,6 +223,16 @@ function openModal(entryId, isDisqualified) {
             const submitButton = document.createElement('button');
             submitButton.type = 'button';
             submitButton.textContent = `Update Week ${week.week_no}`;
+            submitButton.disabled = true; // Initially disabled
+
+            // Enable button only if a change is detected
+            select.addEventListener('change', function () {
+                if (select.value !== week.selection) {
+                    submitButton.disabled = false;
+                } else {
+                    submitButton.disabled = true;
+                }
+            });
 
             // Disable the submit button if the week is locked or the entry is disqualified
             if (week.locked || isDisqualified) {
