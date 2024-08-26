@@ -221,11 +221,17 @@ function openModal(entryId, isDisqualified) {
 
             // Create a submit button for each week
             const submitButton = document.createElement('button');
-            submitButton.type = 'button'; // Changed from 'submit' to 'button'
+            submitButton.type = 'button';
             submitButton.textContent = `Update Week ${week.week_no}`;
-            submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
-            form.appendChild(submitButton);
 
+            // Disable the submit button if the week is locked or the entry is disqualified
+            if (week.locked || isDisqualified) {
+                submitButton.disabled = true;
+            } else {
+                submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
+            }
+
+            form.appendChild(submitButton);
             form.appendChild(document.createElement('br'));
         });
     }
