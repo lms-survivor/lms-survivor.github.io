@@ -244,3 +244,28 @@ footer {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+
+
+
+
+
+
+
+.form-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px; /* Adjust the gap between columns as needed */
+}
+
+.form-item {
+    margin-bottom: 20px;
+}
+.form-item label,
+.form-item select,
+.form-item button,
+.form-item span {
+    display: block;
+    width: 100%;
+    margin-bottom: 5px;
+}
