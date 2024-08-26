@@ -1,1 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Last Man Standing - Home</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
+    <script>
+        // Function to check if the user is logged in
+        function checkIfLoggedIn() {
+            const isLoggedIn = sessionStorage.getItem('approved') === 'true';
+            if (!isLoggedIn) {
+                // If the user is not logged in, redirect them to the login page
+                window.location.href = 'index.html';
+            }
+        }
 
+        // Run the check when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', checkIfLoggedIn);
+    </script>
+</head>
+<body onload="checkAccess()">
+
+    <header>
+        <h1>222 Last Man Standing</h1>
+        <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
+    <button id="signOutButton" class="sign-out-button">Sign Out</button>
+    </header>
+
+    <div class="container">
+        <h2>Welcome, <span id="userName"></span>!</h2><br>
+        
+        <!-- User Profile Information -->
+        <section>
+            <h3>Your Profile</h3>
+            <p><strong>Email:</strong> <span id="userEmail"></span></p>
+            <p><strong>Phone Number:</strong> <span id="userPhone"></span></p>
+        </section><br>
+
+        
+        
+        <!-- pay Information -->
+        <section>
+            <h3>Payment Info</h3>
+            <p>The cost per entry is $50.00</p>
+            <p>Fees should be directly paid to Kevin via cash, Venmo, or PayPal</p>
+            <p><strong>Venmo:</strong>  <a href="https://venmo.com/u/canovalik">https://venmo.com/u/canovalik</a></p>
+            <p><strong>PayPal:</strong>  Find me using canovalik@gmail.com
+        </section><br>
+
+        
+
+        <!-- Pool Entries -->
+        <section>
+            <h1>**NOTE*** The editing of picks is not currently functioning.  We will email you and let you know when this feature is working!</h1>
+            <h3>Your Pool Entries</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Entry Name</th>
+                        <th>Status</th>
+                        <th>Paid in Full</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="entriesTableBody">
+                    <!-- Pool Entries will be dynamically loaded here -->
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <!-- Modal for editing/viewing picks -->
+    <div id="picksModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Edit Your Picks</h2>
+            <form id="picksForm">
+                <!-- Weekly picks will be dynamically generated here -->
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 optimAIze plus LLC. All Rights Reserved.</p>
+        <img src="logo.png" alt="Logo" style="width: 10%; background-color: white; padding: 5px;">
+
+    </footer>
+
+    <script>
+        // Load user data from session storage
+        document.getElementById('userName').innerText = sessionStorage.getItem('first_name') + ' ' + sessionStorage.getItem('last_name');
+        document.getElementById('userEmail').innerText = sessionStorage.getItem('email');
+        document.getElementById('userPhone').innerText = sessionStorage.getItem('phone');
+
+        // Load pool entries from session storage
+        const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
+        const entriesTableBody = document.getElementById('entriesTableBody');
+
+        poolEntries.forEach(entry => {
+            const row = document.createElement('tr');
+
+            const entryNameCell = document.createElement('td');
+            entryNameCell.textContent = entry.lms_display_name;
+            row.appendChild(entryNameCell);
+
+            const statusCell = document.createElement('td');
+            statusCell.textContent = entry.disqualified ? 'Disqualified' : 'Active';
+            row.appendChild(statusCell);
+
+            const paidCell = document.createElement('td');
+            paidCell.textContent = entry.paid_in_full ? 'Yes' : 'No';
+            row.appendChild(paidCell);
+
+            const actionCell = document.createElement('td');
+            const actionButton = document.createElement('button');
+            actionButton.textContent = entry.disqualified ? 'View' : 'Edit';
+            actionButton.onclick = () => openModal(entry.dvuid, entry.disqualified);
+            actionCell.appendChild(actionButton);
+            row.appendChild(actionCell);
+
+            entriesTableBody.appendChild(row);
+        });
+
+// Open the modal for editing/viewing picks
+function openModal(entryId, isDisqualified) {
+    const modal = document.getElementById('picksModal');
+    const form = document.getElementById('picksForm');
+
+    // Clear previous form fields
+    form.innerHTML = '';
+
+    const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
+    const entry = poolEntries.find(e => e.dvuid === entryId);
+
+    if (entry) {
+        entry.weeks.forEach(week => {
+            const label = document.createElement('label');
+            label.textContent = `Week ${week.week_no}`;
+            form.appendChild(label);
+
+            const select = document.createElement('select');
+            select.id = `week${week.week_no}`;
+            select.disabled = week.locked || isDisqualified;
+
+            const teamOptions = JSON.parse(sessionStorage.getItem('team_options'));
+
+            teamOptions.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team;
+                option.textContent = team;
+                if (team === week.selection) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+
+            form.appendChild(select);
+            form.appendChild(document.createElement('br'));
+        });
+
+        if (!isDisqualified) {
+            const submitButton = document.createElement('button');
+            submitButton.type = 'submit';
+            submitButton.textContent = 'Update Picks';
+            form.appendChild(submitButton);
+
+            // Attach the event listener to form submit
+            form.onsubmit = (event) => handlePicksSubmission(event, entry.dvuid);
+        }
+    }
+
+    modal.style.display = 'block';
+}
+
+        // Close the modal
+        function closeModal() {
+            document.getElementById('picksModal').style.display = 'none';
+        }
+
+        // Ensure the modal closes when the user clicks outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('picksModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+
+<div id="overlay"></div>
+<div id="loading" style="display:none;">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+    <h3>This may take longer for users with multiple entries!</h3>
+</div>
+    
+</body>
+</html>
