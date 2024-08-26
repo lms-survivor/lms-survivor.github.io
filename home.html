@@ -200,29 +200,23 @@ function handleWeekSubmission(entryId, weekNo) {
 
 // Open the modal for editing/viewing picks
 function openModal(entryId, isDisqualified) {
-    console.log('Opening modal for entry:', entryId); // Debugging line
     const modal = document.getElementById('picksModal');
     const form = document.getElementById('picksForm');
 
     // Clear previous form fields
-    form.innerHTML = ''; // Clear any existing content in the form
-
-    // Create and append the form container
-    const formContainer = document.createElement('div');
-    formContainer.className = 'form-container';
-    form.appendChild(formContainer);
+    form.innerHTML = '';
 
     const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
     const entry = poolEntries.find(e => e.dvuid === entryId);
 
     if (entry) {
-        entry.weeks.forEach((week, index) => {
-            const formItem = document.createElement('div');
-            formItem.className = 'form-item';
+        // Array to store current selections
+        let selectedTeams = [];
 
+        entry.weeks.forEach(week => {
             const label = document.createElement('label');
             label.textContent = `Week ${week.week_no}`;
-            formItem.appendChild(label);
+            form.appendChild(label);
 
             const select = document.createElement('select');
             select.id = `week${week.week_no}`;
@@ -236,33 +230,55 @@ function openModal(entryId, isDisqualified) {
                 option.textContent = team;
                 if (team === week.selection) {
                     option.selected = true;
+                    selectedTeams.push(team); // Track selected teams
                 }
                 select.appendChild(option);
             });
 
-            formItem.appendChild(select);
+            form.appendChild(select);
 
+            // Create a submit button for each week
             const submitButton = document.createElement('button');
             submitButton.type = 'button';
             submitButton.textContent = `Update Week ${week.week_no}`;
-            submitButton.disabled = true;
-            submitButton.style.marginBottom = '15px';
+            submitButton.disabled = true; // Initially disabled
+            submitButton.style.marginBottom = '15px'; // Add some space below the button
 
-            submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
-            formItem.appendChild(submitButton);
 
+            // Create the alert message
             const alertMessage = document.createElement('span');
             alertMessage.textContent = "*** This team has already been picked in another week ***";
             alertMessage.style.color = 'red';
-            alertMessage.style.display = 'none';
-            formItem.appendChild(alertMessage);
+            alertMessage.style.display = 'none'; // Initially hidden
+            form.appendChild(alertMessage);
 
-            formItem.appendChild(document.createElement('br'));
+            // Enable button only if a change is detected and no duplicate selections
+            select.addEventListener('change', function() {
+                // Check for duplicates
+                const selectedValue = select.value;
+                if (selectedTeams.includes(selectedValue) && selectedValue !== week.selection) {
+                    alertMessage.style.display = 'inline';
+                    submitButton.disabled = true;
+                } else {
+                    alertMessage.style.display = 'none';
+                    submitButton.disabled = (select.value === week.selection || isDisqualified);
+                }
 
-            formContainer.appendChild(formItem);
+                // Update the selectedTeams array
+                selectedTeams = entry.weeks.map(week => document.getElementById(`week${week.week_no}`).value);
+            });
+
+            // Disable the submit button if the week is locked or the entry is disqualified
+            if (week.locked || isDisqualified) {
+                submitButton.disabled = true;
+            } else {
+                submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
+            }
+
+            form.appendChild(submitButton);
+            form.appendChild(document.createElement('hr'));
+            form.appendChild(document.createElement('br'));
         });
-    } else {
-        console.error('Entry not found:', entryId);
     }
 
     modal.style.display = 'block';
