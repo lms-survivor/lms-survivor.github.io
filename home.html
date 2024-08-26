@@ -89,45 +89,44 @@
 
        
       <script>
-         // Load user data from session storage
-         document.getElementById('userName').innerText = sessionStorage.getItem('first_name') + ' ' + sessionStorage.getItem('last_name');
-         document.getElementById('userEmail').innerText = sessionStorage.getItem('email');
-         document.getElementById('userPhone').innerText = sessionStorage.getItem('phone');
-         
-         // Load pool entries from session storage
-         const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
-         const entriesTableBody = document.getElementById('entriesTableBody');
-         
-         poolEntries.forEach(entry => {
-             const row = document.createElement('tr');
-         
-             const entryNameCell = document.createElement('td');
-             entryNameCell.textContent = entry.lms_display_name;
-             row.appendChild(entryNameCell);
-         
-             const statusCell = document.createElement('td');
-             statusCell.textContent = entry.disqualified ? 'Disqualified' : 'Active';
-             row.appendChild(statusCell);
-         
-             const paidCell = document.createElement('td');
-             paidCell.textContent = entry.paid_in_full ? 'Yes' : 'No';
-             row.appendChild(paidCell);
-         
-             const actionCell = document.createElement('td');
-             const actionButton = document.createElement('button');
-             actionButton.textContent = entry.disqualified ? 'View' : 'Edit';
-             actionButton.onclick = () => openModal(entry.dvuid, entry.disqualified);
-             actionCell.appendChild(actionButton);
-             row.appendChild(actionCell);
-         
-             entriesTableBody.appendChild(row);
-         });
-         
-         
-         
-         
-         
- function handleWeekSubmission(entryId, weekNo) {
+// Load user data from session storage
+document.getElementById('userName').innerText = sessionStorage.getItem('first_name') + ' ' + sessionStorage.getItem('last_name');
+document.getElementById('userEmail').innerText = sessionStorage.getItem('email');
+document.getElementById('userPhone').innerText = sessionStorage.getItem('phone');
+
+// Load pool entries from session storage
+const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
+const entriesTableBody = document.getElementById('entriesTableBody');
+
+poolEntries.forEach(entry => {
+    const row = document.createElement('tr');
+
+    const entryNameCell = document.createElement('td');
+    entryNameCell.textContent = entry.lms_display_name;
+    row.appendChild(entryNameCell);
+
+    const statusCell = document.createElement('td');
+    statusCell.textContent = entry.disqualified ? 'Disqualified' : 'Active';
+    row.appendChild(statusCell);
+
+    const paidCell = document.createElement('td');
+    paidCell.textContent = entry.paid_in_full ? 'Yes' : 'No';
+    row.appendChild(paidCell);
+
+    const actionCell = document.createElement('td');
+    const actionButton = document.createElement('button');
+    actionButton.textContent = entry.disqualified ? 'View' : 'Edit';
+    actionButton.onclick = () => openModal(entry.dvuid, entry.disqualified);
+    actionCell.appendChild(actionButton);
+    row.appendChild(actionCell);
+
+    entriesTableBody.appendChild(row);
+});
+
+
+
+
+function handleWeekSubmission(entryId, weekNo) {
     const select = document.getElementById(`week${weekNo}`);
     const selection = select.value;
 
@@ -141,7 +140,10 @@
         // Update the specific week's selection in memory
         entry.weeks = entry.weeks.map(week => {
             if (week.week_no === weekNo) {
-                return { ...week, selection: selection };
+                return {
+                    ...week,
+                    selection: selection
+                };
             }
             return week;
         });
@@ -160,144 +162,134 @@
         const url = "https://prod-09.westus.logic.azure.com:443/workflows/67f71c8b4d83430b88587c634518e5b1/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9_LyaG3W0evcEgwJYEckhDw7E02dF4NnGQzqBMrEfnY";
 
         fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            // If the response is successful, show the success message and disable the button
-            const submitButton = document.querySelector(`#week${weekNo} ~ button`);
-            const successMessage = document.createElement('span');
-            successMessage.textContent = "Successfully Updated";
-            successMessage.style.color = 'green';
-            successMessage.style.marginLeft = '10px';
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                // If the response is successful, show the success message and disable the button
+                const submitButton = document.querySelector(`#week${weekNo} ~ button`);
+                const successMessage = document.createElement('span');
+                successMessage.textContent = "Successfully Updated";
+                successMessage.style.color = 'green';
+                successMessage.style.marginLeft = '10px';
 
-            // Disable the button
-            submitButton.disabled = true;
+                // Disable the button
+                submitButton.disabled = true;
 
-            // Remove any existing success messages
-            const existingMessage = submitButton.nextElementSibling;
-            if (existingMessage) {
-                existingMessage.remove();
-            }
+                // Remove any existing success messages
+                const existingMessage = submitButton.nextElementSibling;
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
 
-            // Append the new success message
-            submitButton.insertAdjacentElement('afterend', successMessage);
-        })
-        .catch(error => console.error('Error:', error));
+                // Append the new success message
+                submitButton.insertAdjacentElement('afterend', successMessage);
+            })
+            .catch(error => console.error('Error:', error));
     }
 }
-         
-         
-         
-         
-         
-         
-         
-         
-         // Open the modal for editing/viewing picks
-         function openModal(entryId, isDisqualified) {
-         const modal = document.getElementById('picksModal');
-         const form = document.getElementById('picksForm');
-         
-         // Clear previous form fields
-         form.innerHTML = '';
-         
-         const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
-         const entry = poolEntries.find(e => e.dvuid === entryId);
-         
-         if (entry) {
-         // Array to store current selections
-         let selectedTeams = [];
-         
-         entry.weeks.forEach(week => {
-             const label = document.createElement('label');
-             label.textContent = `Week ${week.week_no}`;
-             form.appendChild(label);
-         
-             const select = document.createElement('select');
-             select.id = `week${week.week_no}`;
-             select.disabled = week.locked || isDisqualified;
-         
-             const teamOptions = JSON.parse(sessionStorage.getItem('team_options'));
-         
-             teamOptions.forEach(team => {
-                 const option = document.createElement('option');
-                 option.value = team;
-                 option.textContent = team;
-                 if (team === week.selection) {
-                     option.selected = true;
-                     selectedTeams.push(team); // Track selected teams
-                 }
-                 select.appendChild(option);
-             });
-         
-             form.appendChild(select);
-         
-             // Create a submit button for each week
-             const submitButton = document.createElement('button');
-             submitButton.type = 'button';
-             submitButton.textContent = `Update Week ${week.week_no}`;
-             submitButton.disabled = true; // Initially disabled
-             submitButton.style.marginBottom = '15px'; // Add some space below the button
-         
-         
-             // Create the alert message
-             const alertMessage = document.createElement('span');
-             alertMessage.textContent = "*** This team has already been picked in another week ***";
-             alertMessage.style.color = 'red';
-             alertMessage.style.display = 'none'; // Initially hidden
-             form.appendChild(alertMessage);
-         
-             // Enable button only if a change is detected and no duplicate selections
-             select.addEventListener('change', function () {
-                 // Check for duplicates
-                 const selectedValue = select.value;
-                 if (selectedTeams.includes(selectedValue) && selectedValue !== week.selection) {
-                     alertMessage.style.display = 'inline';
-                     submitButton.disabled = true;
-                 } else {
-                     alertMessage.style.display = 'none';
-                     submitButton.disabled = (select.value === week.selection || isDisqualified);
-                 }
-         
-                 // Update the selectedTeams array
-                 selectedTeams = entry.weeks.map(week => document.getElementById(`week${week.week_no}`).value);
-             });
-         
-             // Disable the submit button if the week is locked or the entry is disqualified
-             if (week.locked || isDisqualified) {
-                 submitButton.disabled = true;
-             } else {
-                 submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
-             }
-         
-             form.appendChild(submitButton);
-             form.appendChild(document.createElement('hr'));
-             form.appendChild(document.createElement('br'));
-         });
-         }
-         
-         modal.style.display = 'block';
-         }
-         
-         // Close the modal
-         function closeModal() {
-             document.getElementById('picksModal').style.display = 'none';
-         }
-         
-         // Ensure the modal closes when the user clicks outside of it
-         window.onclick = function(event) {
-             const modal = document.getElementById('picksModal');
-             if (event.target === modal) {
-                 modal.style.display = 'none';
-             }
-         }
+
+
+
+
+// Open the modal for editing/viewing picks
+function openModal(entryId, isDisqualified) {
+    const modal = document.getElementById('picksModal');
+    const form = document.getElementById('picksForm');
+
+    // Clear previous form fields
+    form.innerHTML = '';
+
+    const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
+    const entry = poolEntries.find(e => e.dvuid === entryId);
+
+    if (entry) {
+        entry.weeks.forEach(week => {
+            const label = document.createElement('label');
+            label.textContent = `Week ${week.week_no}`;
+            form.appendChild(label);
+
+            const select = document.createElement('select');
+            select.id = `week${week.week_no}`;
+            select.disabled = week.locked || isDisqualified;
+
+            const teamOptions = JSON.parse(sessionStorage.getItem('team_options'));
+
+            teamOptions.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team;
+                option.textContent = team;
+                if (team === week.selection) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+
+            form.appendChild(select);
+
+            const submitButton = document.createElement('button');
+            submitButton.type = 'button';
+            submitButton.textContent = `Update Week ${week.week_no}`;
+            submitButton.disabled = true; // Initially disabled
+
+            const alertMessage = document.createElement('span');
+            alertMessage.textContent = "*** This team has already been picked in another week ***";
+            alertMessage.style.color = 'red';
+            alertMessage.style.display = 'none'; // Initially hidden
+            form.appendChild(alertMessage);
+
+            // Enable button only if a change is detected and no duplicate selections
+            select.addEventListener('change', function () {
+                // Check for duplicates
+                const selectedValue = select.value;
+                if (selectedTeams.includes(selectedValue) && selectedValue !== week.selection) {
+                    alertMessage.style.display = 'inline';
+                    submitButton.disabled = true;
+                } else {
+                    alertMessage.style.display = 'none';
+                    submitButton.disabled = (select.value === week.selection || isDisqualified);
+                }
+
+                // Remove the success message when the dropdown is changed
+                const successMessage = submitButton.nextElementSibling;
+                if (successMessage && successMessage.textContent === "Successfully Updated") {
+                    successMessage.remove();
+                }
+
+                // Update the selectedTeams array
+                selectedTeams = entry.weeks.map(week => document.getElementById(`week${week.week_no}`).value);
+            });
+
+            // Attach the event listener for the submit button
+            submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
+
+            form.appendChild(submitButton);
+            form.appendChild(document.createElement('hr'));
+            form.appendChild(document.createElement('br'));
+        });
+    }
+
+    modal.style.display = 'block';
+}
+
+// Close the modal
+function closeModal() {
+    document.getElementById('picksModal').style.display = 'none';
+}
+
+// Ensure the modal closes when the user clicks outside of it
+window.onclick = function(event) {
+    const modal = document.getElementById('picksModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+}         
       </script>
       <div id="overlay"></div>
       <div id="loading" style="display:none;">
