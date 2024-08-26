@@ -171,7 +171,7 @@ function handlePicksSubmission(event, entryId) {
     .then(response => response.json())
     .then(data => {
         sessionStorage.setItem('pool_entries', JSON.stringify(data.pool_entries));
-        // window.location.href = 'picksupdated.html';
+        window.location.href = 'picksupdated.html';
     })
     .catch(error => console.error('Error:', error));
 }
