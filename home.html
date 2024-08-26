@@ -128,6 +128,11 @@
 
 
 function handleWeekSubmission(entryId, weekNo) {
+
+    // Show loader
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('loading').style.display = 'block';
+    
     const select = document.getElementById(`week${weekNo}`);
     const selection = select.value;
 
@@ -167,13 +172,26 @@ function handleWeekSubmission(entryId, weekNo) {
             },
             body: JSON.stringify(payload)
         })
-        .then(response => response.json())
+        .then(response => {
+        // Hide loader
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('loading').style.display = 'none';
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+})
         .then(data => {
             console.log('Week updated successfully:', data);
             // Update session storage with the latest pool entries
             sessionStorage.setItem('pool_entries', JSON.stringify(poolEntries));
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+        // Hide loader on error
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('loading').style.display = 'none';
+        console.error('Error:', error);
+    });
     }
 }
 
