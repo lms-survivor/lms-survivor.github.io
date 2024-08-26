@@ -228,6 +228,7 @@ footer {
     transform: translate(-50%, -50%);
     z-index: 9999; /* In front of the overlay */
     text-align: center;
+    color: white;
 }
 
 .spinner {
