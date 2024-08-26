@@ -228,6 +228,8 @@ function openModal(entryId, isDisqualified) {
             submitButton.type = 'button';
             submitButton.textContent = `Update Week ${week.week_no}`;
             submitButton.disabled = true; // Initially disabled
+            submitButton.style.marginBottom = '15px'; // Add some space below the button
+
 
             // Create the alert message
             const alertMessage = document.createElement('span');
