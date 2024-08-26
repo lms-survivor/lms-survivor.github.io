@@ -23,7 +23,7 @@
 <body onload="checkAccess()">
 
     <header>
-        <h1>123 Last Man Standing</h1>
+        <h1>456 Last Man Standing</h1>
         <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
     <button id="signOutButton" class="sign-out-button">Sign Out</button>
     </header>
@@ -123,6 +123,67 @@
             entriesTableBody.appendChild(row);
         });
 
+
+
+
+
+function handleWeekSubmission(entryId, weekNo) {
+    const select = document.getElementById(`week${weekNo}`);
+    const selection = select.value;
+
+    // Get the current pool entries from session storage
+    let poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
+
+    // Find the specific entry by entryId
+    let entry = poolEntries.find(e => e.dvuid === entryId);
+
+    if (entry) {
+        // Update the specific week's selection
+        entry.weeks = entry.weeks.map(week => {
+            if (week.week_no === weekNo) {
+                return { ...week, selection: selection };
+            }
+            return week;
+        });
+
+        // JSON payload for updating the specific week
+        const payload = {
+            "email_address": sessionStorage.getItem('email'),
+            "first_name": sessionStorage.getItem('first_name'),
+            "last_name": sessionStorage.getItem('last_name'),
+            "phone_number": sessionStorage.getItem('phone'),
+            "dvuid": entry.dvuid,
+            "week_no": weekNo,
+            "selection": selection
+        };
+
+        // Replace with your actual URL for the week update
+        const url = "https://prod-09.westus.logic.azure.com:443/workflows/67f71c8b4d83430b88587c634518e5b1/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9_LyaG3W0evcEgwJYEckhDw7E02dF4NnGQzqBMrEfnY";
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Week updated successfully:', data);
+            // Update session storage with the latest pool entries
+            sessionStorage.setItem('pool_entries', JSON.stringify(poolEntries));
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+
+
+
+
+
+
+        
 // Open the modal for editing/viewing picks
 function openModal(entryId, isDisqualified) {
     const modal = document.getElementById('picksModal');
