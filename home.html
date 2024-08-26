@@ -210,6 +210,9 @@ function openModal(entryId, isDisqualified) {
     const entry = poolEntries.find(e => e.dvuid === entryId);
 
     if (entry) {
+        // Array to store current selections
+        let selectedTeams = [];
+
         entry.weeks.forEach(week => {
             const label = document.createElement('label');
             label.textContent = `Week ${week.week_no}`;
@@ -227,17 +230,22 @@ function openModal(entryId, isDisqualified) {
                 option.textContent = team;
                 if (team === week.selection) {
                     option.selected = true;
+                    selectedTeams.push(team); // Track selected teams
                 }
                 select.appendChild(option);
             });
 
             form.appendChild(select);
 
+            // Create a submit button for each week
             const submitButton = document.createElement('button');
             submitButton.type = 'button';
             submitButton.textContent = `Update Week ${week.week_no}`;
             submitButton.disabled = true; // Initially disabled
+            submitButton.style.marginBottom = '15px'; // Add some space below the button
 
+
+            // Create the alert message
             const alertMessage = document.createElement('span');
             alertMessage.textContent = "*** This team has already been picked in another week ***";
             alertMessage.style.color = 'red';
@@ -245,7 +253,7 @@ function openModal(entryId, isDisqualified) {
             form.appendChild(alertMessage);
 
             // Enable button only if a change is detected and no duplicate selections
-            select.addEventListener('change', function () {
+            select.addEventListener('change', function() {
                 // Check for duplicates
                 const selectedValue = select.value;
                 if (selectedTeams.includes(selectedValue) && selectedValue !== week.selection) {
@@ -256,18 +264,16 @@ function openModal(entryId, isDisqualified) {
                     submitButton.disabled = (select.value === week.selection || isDisqualified);
                 }
 
-                // Remove the success message when the dropdown is changed
-                const successMessage = submitButton.nextElementSibling;
-                if (successMessage && successMessage.textContent === "Successfully Updated") {
-                    successMessage.remove();
-                }
-
                 // Update the selectedTeams array
                 selectedTeams = entry.weeks.map(week => document.getElementById(`week${week.week_no}`).value);
             });
 
-            // Attach the event listener for the submit button
-            submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
+            // Disable the submit button if the week is locked or the entry is disqualified
+            if (week.locked || isDisqualified) {
+                submitButton.disabled = true;
+            } else {
+                submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
+            }
 
             form.appendChild(submitButton);
             form.appendChild(document.createElement('hr'));
@@ -289,7 +295,7 @@ window.onclick = function(event) {
     if (event.target === modal) {
         modal.style.display = 'none';
     }
-}         
+}
       </script>
       <div id="overlay"></div>
       <div id="loading" style="display:none;">
