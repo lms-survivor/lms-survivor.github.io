@@ -200,68 +200,69 @@ function handleWeekSubmission(entryId, weekNo) {
 
 // Open the modal for editing/viewing picks
 function openModal(entryId, isDisqualified) {
+    console.log('Opening modal for entry:', entryId); // Debugging line
     const modal = document.getElementById('picksModal');
     const form = document.getElementById('picksForm');
 
     // Clear previous form fields
-    form.innerHTML = '';
+    form.innerHTML = ''; // Clear any existing content in the form
+
+    // Create and append the form container
+    const formContainer = document.createElement('div');
+    formContainer.className = 'form-container';
+    form.appendChild(formContainer);
 
     const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
     const entry = poolEntries.find(e => e.dvuid === entryId);
 
     if (entry) {
-        // Array to store current selections
-        let selectedTeams = [];
+        entry.weeks.forEach((week, index) => {
+            const formItem = document.createElement('div');
+            formItem.className = 'form-item';
 
+            const label = document.createElement('label');
+            label.textContent = `Week ${week.week_no}`;
+            formItem.appendChild(label);
 
-entry.weeks.forEach((week, index) => {
-    const formItem = document.createElement('div');
-    formItem.className = 'form-item';
+            const select = document.createElement('select');
+            select.id = `week${week.week_no}`;
+            select.disabled = week.locked || isDisqualified;
 
-    const label = document.createElement('label');
-    label.textContent = `Week ${week.week_no}`;
-    formItem.appendChild(label);
+            const teamOptions = JSON.parse(sessionStorage.getItem('team_options'));
 
-    const select = document.createElement('select');
-    select.id = `week${week.week_no}`;
-    select.disabled = week.locked || isDisqualified;
+            teamOptions.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team;
+                option.textContent = team;
+                if (team === week.selection) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
 
-    const teamOptions = JSON.parse(sessionStorage.getItem('team_options'));
+            formItem.appendChild(select);
 
-    teamOptions.forEach(team => {
-        const option = document.createElement('option');
-        option.value = team;
-        option.textContent = team;
-        if (team === week.selection) {
-            option.selected = true;
-        }
-        select.appendChild(option);
-    });
+            const submitButton = document.createElement('button');
+            submitButton.type = 'button';
+            submitButton.textContent = `Update Week ${week.week_no}`;
+            submitButton.disabled = true;
+            submitButton.style.marginBottom = '15px';
 
-    formItem.appendChild(select);
+            submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
+            formItem.appendChild(submitButton);
 
-    const submitButton = document.createElement('button');
-    submitButton.type = 'button';
-    submitButton.textContent = `Update Week ${week.week_no}`;
-    submitButton.disabled = true;
-    submitButton.style.marginBottom = '15px';
+            const alertMessage = document.createElement('span');
+            alertMessage.textContent = "*** This team has already been picked in another week ***";
+            alertMessage.style.color = 'red';
+            alertMessage.style.display = 'none';
+            formItem.appendChild(alertMessage);
 
-    submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
-    formItem.appendChild(submitButton);
+            formItem.appendChild(document.createElement('br'));
 
-    const alertMessage = document.createElement('span');
-    alertMessage.textContent = "*** This team has already been picked in another week ***";
-    alertMessage.style.color = 'red';
-    alertMessage.style.display = 'none';
-    formItem.appendChild(alertMessage);
-
-    formItem.appendChild(document.createElement('br'));
-    
-    form.querySelector('.form-container').appendChild(formItem);
-});
-
-
-       
+            formContainer.appendChild(formItem);
+        });
+    } else {
+        console.error('Entry not found:', entryId);
     }
 
     modal.style.display = 'block';
