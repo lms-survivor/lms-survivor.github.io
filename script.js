@@ -155,6 +155,9 @@ function handlePicksSubmission(event, entryId) {
         "pool_entries": poolEntries
     };
 
+    // Log the payload to the console for debugging
+    console.log('Payload:', JSON.stringify(payload, null, 2));
+    
     // Replace with your actual Flow 3 URL
     const url = "https://prod-146.westus.logic.azure.com:443/workflows/ea98804653da4ba1b279e4807c41de7c/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=-GnfPQCEtYq4s5taQ5x8uwm1NwCSrL-wRWzPmTfaAWs";
 
