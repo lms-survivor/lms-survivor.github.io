@@ -240,9 +240,27 @@ function openModal(entryId, isDisqualified) {
             // Create a submit button for each week
             const submitButton = document.createElement('button');
             submitButton.type = 'button';
-            submitButton.textContent = `Update Week ${week.week_no}`;
-            submitButton.disabled = true; // Initially disabled
+            //submitButton.textContent = `Update Week ${week.week_no}`;
+            //submitButton.disabled = true; // Initially disabled
             submitButton.style.marginBottom = '15px'; // Add some space below the button
+
+           // Change button text if the week is locked
+            if (week.locked) {
+                submitButton.textContent = "This week has been LOCKED";
+                submitButton.disabled = true; // Disable the button since it's locked
+            } else if (isDisqualified) {
+                submitButton.textContent = "Disqualified";
+                submitButton.disabled = true; // Disable the button if disqualified
+            } else {
+                submitButton.textContent = `Update Week ${week.week_no}`;
+                submitButton.disabled = true; // Initially disabled, enabled after change
+                //submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
+            }
+
+
+
+
+           
 
 
             // Create the alert message
