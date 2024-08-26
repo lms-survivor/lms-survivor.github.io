@@ -157,22 +157,21 @@ function openModal(entryId, isDisqualified) {
             });
 
             form.appendChild(select);
-            form.appendChild(document.createElement('br'));
-        });
 
-        if (!isDisqualified) {
+            // Create a submit button for each week
             const submitButton = document.createElement('button');
-            submitButton.type = 'submit';
-            submitButton.textContent = 'Update Picks';
+            submitButton.type = 'button'; // Changed from 'submit' to 'button'
+            submitButton.textContent = `Update Week ${week.week_no}`;
+            submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
             form.appendChild(submitButton);
 
-            // Attach the event listener to form submit
-            form.onsubmit = (event) => handlePicksSubmission(event, entry.dvuid);
-        }
+            form.appendChild(document.createElement('br'));
+        });
     }
 
     modal.style.display = 'block';
 }
+
 
         // Close the modal
         function closeModal() {
