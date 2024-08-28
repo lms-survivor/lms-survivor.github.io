@@ -26,8 +26,9 @@ function handleLogin(event) {
     };
 
     // Replace with your actual Flow 1 URL
-    const url = "https://prod-178.westus.logic.azure.com:443/workflows/e6d212ed6f314eefb720808db7116632/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gYdb3GZbZ9xlpdHaJoHkT6gBzNmtJGM6wI1GApAXJR8";
-                 
+    //const url = "https://prod-178.westus.logic.azure.com:443/workflows/e6d212ed6f314eefb720808db7116632/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gYdb3GZbZ9xlpdHaJoHkT6gBzNmtJGM6wI1GApAXJR8";
+      const url = "https://prod-62.westus.logic.azure.com:443/workflows/631ff36b4d5147c883d23ccb9c31b63e/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sxVJtzq9fhk5TtavMR_GyJ6B5M-V-RpPh-c3EGH9laE";
+    
     fetch(url, {
         method: 'POST',
         headers: {
