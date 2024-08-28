@@ -1,4 +1,25 @@
-        .paypal-button {
+          .view-edit-btn {
+            background-color: #FFD700; /* Black background */
+            color: #000000; /* Gold text */
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 2px solid #000000; /* Gold border */
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+            margin-bottom: 10px; /* Add margin to the bottom of the button */
+            transition: background-color 0.3s; /* Smooth transition */
+}
+
+.view-edit-btn:hover {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+}
+
+.paypal-button {
             background-color: #000000; /* Black background */
             color: #FFD700; /* Gold text */
             font-size: 14px;
@@ -10,12 +31,14 @@
             text-decoration: none;
             display: inline-block;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
             margin-bottom: 10px; /* Add margin to the bottom of the button */
+            transition: background-color 0.3s; /* Smooth transition */
         }
-        .paypal-button:hover {
-            background-color: #005c9e;
-        }
+        
+.paypal-button:hover {
+    background-color: rgba(102, 87, 0, 0.9); /* Dark transparent gold */
+}
 
 /* General Reset */
 * {
