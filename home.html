@@ -43,8 +43,8 @@
             <h3>Payment Info</h3>
             <p>The cost per entry is $50.00</p>
             <p style="margin-bottom: 10px;">Fees should be directly paid to Kevin via cash, Venmo, or PayPal</p>
-            <p><strong>Venmo:</strong>  <a href="https://venmo.com/u/canovalik"><a href="https://venmo.com/u/canovalik" class="paypal-button" target="_blank">Pay via Venmo</a></a></p>
-            <p><strong>PayPal:</strong>  <a href="https://www.paypal.me/canovalik" class="paypal-button" target="_blank">Pay via PayPal</a>
+            <p><strong>Venmo:</strong>  <a href="https://venmo.com/u/canovalik" class="paypal-button" target="_blank">Pay via Venmo</a></p>
+            <p><strong>PayPal:</strong>  <a href="https://www.paypal.me/canovalik" class="paypal-button" target="_blank">Pay via PayPal</a></p>
          </section>
          <br>
 
@@ -115,6 +115,7 @@ poolEntries.forEach(entry => {
 
     const actionCell = document.createElement('td');
     const actionButton = document.createElement('button');
+    actionButton.classList.add('view-edit-btn'); // Add this line to apply specific styles
     actionButton.textContent = entry.disqualified ? 'View' : 'Edit';
     actionButton.onclick = () => openModal(entry.dvuid, entry.disqualified);
     actionCell.appendChild(actionButton);
