@@ -1,3 +1,22 @@
+        .paypal-button {
+            background-color: #0070ba;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px; /* Add margin to the bottom of the button */
+        }
+        .paypal-button:hover {
+            background-color: #005c9e;
+        }
+
 /* General Reset */
 * {
     margin: 0;
