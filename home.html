@@ -1,326 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Last Man Standing - Home</title>
-      <link rel="stylesheet" href="style.css">
-      <script defer src="script.js"></script>
-      <script>
-         // Function to check if the user is logged in
-         function checkIfLoggedIn() {
-             const isLoggedIn = sessionStorage.getItem('approved') === 'true';
-             if (!isLoggedIn) {
-                 // If the user is not logged in, redirect them to the login page
-                 window.location.href = 'index.html';
-             }
-         }
-         
-         // Run the check when the DOM is fully loaded
-         document.addEventListener('DOMContentLoaded', checkIfLoggedIn);
-      </script>
-   </head>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Last Man Standing — Home</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script defer src="script.js"></script>
+</head>
+<body data-page="home">
+  <header>
+    <div class="header-inner">
+      <a class="brand" href="home.html">
+        <img src="logo.png" alt="LMS Logo"/>
+        <div class="title">Last Man Standing</div>
+      </a>
+      <div class="header-actions">
+        <span id="welcomeName" class="badge">Welcome</span>
+        <button id="signOutButton" class="btn btn-outline">Sign out</button>
+      </div>
+    </div>
+  </header>
 
-    
-   <body onload="checkAccess()">
-      <header>
-         <h1>Last Man Standing</h1>
-         <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
-         <button id="signOutButton" class="sign-out-button">Sign Out</button>
-      </header>
-      <div class="container">
-         <h2>Welcome, <span id="userName"></span>!</h2>
-         <br>
-         <!-- User Profile Information -->
-         <section>
-            <h3>Your Profile</h3>
-            <p><strong>Email:</strong> <span id="userEmail"></span></p>
-            <p><strong>Phone Number:</strong> <span id="userPhone"></span></p>
-         </section>
-         <br>
-         <!-- pay Information -->
-         <section>
-            <h3>Payment Info</h3>
-            <p>The cost per entry is $50.00</p>
-            <p style="margin-bottom: 10px;">Fees should be directly paid to Kevin via cash, Venmo, or PayPal</p>
-            <p><strong>Venmo:</strong>  <a href="https://venmo.com/u/canovalik" class="paypal-button" target="_blank">Pay via Venmo</a></p>
-            <p><strong>PayPal:</strong>  <a href="https://www.paypal.me/canovalik" class="paypal-button" target="_blank">Pay via PayPal</a></p>
-         </section>
-         <br>
-
-          
-         <!-- Pool Entries -->
-         <section>
-            <!--<h1>**NOTE*** The editing of picks is not currently functioning.  We will email you and let you know when this feature is working!</h1>-->
-            <h3>Your Pool Entries</h3>
-            <table>
-               <thead>
-                  <tr>
-                     <th>Entry Name</th>
-                     <th>Status</th>
-                     <th>Paid in Full</th>
-                     <th>Actions</th>
-                  </tr>
-               </thead>
-               <tbody id="entriesTableBody">
-                  <!-- Pool Entries will be dynamically loaded here -->
-               </tbody>
+  <main class="container">
+    <div class="grid">
+      <div class="card">
+        <div class="card-hd">
+          <h2>Your entries</h2>
+          <div class="subtle">Edit picks, see status, and check locks.</div>
+        </div>
+        <div class="card-bd">
+          <div style="overflow:auto">
+            <table class="table" id="entriesTable">
+              <thead>
+                <tr>
+                  <th>Entry</th>
+                  <th>Status</th>
+                  <th>Latest Pick</th>
+                  <th>Weeks Completed</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="entriesTbody">
+                <!-- filled by script -->
+              </tbody>
             </table>
-         </section>
+          </div>
+        </div>
       </div>
 
-       
-      <!-- Modal for editing/viewing picks -->
-      <div id="picksModal" class="modal">
-         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Edit Your Picks!</h2>
-            <form id="picksForm">
-               <!-- Weekly picks will be dynamically generated here -->
-            </form>
-         </div>
+      <div class="card">
+        <div class="card-hd">
+          <h2>Notes</h2>
+          <div class="subtle">Rules & reminders</div>
+        </div>
+        <div class="card-bd">
+          <ul>
+            <li>Once a week is <span class="pill amber">LOCKED</span>, picks for that week are disabled.</li>
+            <li>If an entry is <span class="pill red">DISQUALIFIED</span>, picks are disabled for that entry.</li>
+            <li>“Successfully Updated” appears next to a week’s Save button after a successful save, and disappears if you change the selection again.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Picks Modal -->
+  <div class="modal" id="picksModal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <span class="close" id="closeModal" aria-label="Close">&times;</span>
+      <h2 id="modalTitle">Edit Picks</h2>
+      <div id="entryStatusRow" style="margin:6px 0 14px"></div>
+
+      <div class="picks" id="weeksGrid">
+        <!-- week cards inserted here -->
       </div>
 
-       
-      <footer>
-         <p>&copy; 2024 optimAIze plus LLC. All Rights Reserved.</p>
-         <img src="logo.png" alt="Logo" style="width: 10%; background-color: white; padding: 5px;">
-      </footer>
-
-       
-      <script>
-// Load user data from session storage
-document.getElementById('userName').innerText = sessionStorage.getItem('first_name') + ' ' + sessionStorage.getItem('last_name');
-document.getElementById('userEmail').innerText = sessionStorage.getItem('email');
-document.getElementById('userPhone').innerText = sessionStorage.getItem('phone');
-
-// Load pool entries from session storage
-const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
-const entriesTableBody = document.getElementById('entriesTableBody');
-
-poolEntries.forEach(entry => {
-    const row = document.createElement('tr');
-
-    const entryNameCell = document.createElement('td');
-    entryNameCell.textContent = entry.lms_display_name;
-    row.appendChild(entryNameCell);
-
-    const statusCell = document.createElement('td');
-    statusCell.textContent = entry.disqualified ? 'Disqualified' : 'Active';
-    row.appendChild(statusCell);
-
-    const paidCell = document.createElement('td');
-    paidCell.textContent = entry.paid_in_full ? 'Yes' : 'No';
-    row.appendChild(paidCell);
-
-    const actionCell = document.createElement('td');
-    const actionButton = document.createElement('button');
-    actionButton.classList.add('view-edit-btn'); // Add this line to apply specific styles
-    actionButton.textContent = entry.disqualified ? 'View' : 'Edit';
-    actionButton.onclick = () => openModal(entry.dvuid, entry.disqualified);
-    actionCell.appendChild(actionButton);
-    row.appendChild(actionCell);
-
-    entriesTableBody.appendChild(row);
-});
-
-
-
-
-function handleWeekSubmission(entryId, weekNo) {
-    const select = document.getElementById(`week${weekNo}`);
-    const selection = select.value;
-
-    // Get the current pool entries from session storage
-    let poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
-
-    // Find the specific entry by entryId
-    let entry = poolEntries.find(e => e.dvuid === entryId);
-
-    if (entry) {
-        // Update the specific week's selection in memory
-        entry.weeks = entry.weeks.map(week => {
-            if (week.week_no === weekNo) {
-                return {
-                    ...week,
-                    selection: selection
-                };
-            }
-            return week;
-        });
-
-        // Update session storage with the modified data
-        sessionStorage.setItem('pool_entries', JSON.stringify(poolEntries));
-
-        // JSON payload for updating the specific week in the database
-        const payload = {
-            "dvuid": entry.dvuid,
-            "week_no": weekNo,
-            "selection": selection
-        };
-
-        // Replace with your actual URL for the week update
-        const url = "https://prod-09.westus.logic.azure.com:443/workflows/67f71c8b4d83430b88587c634518e5b1/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9_LyaG3W0evcEgwJYEckhDw7E02dF4NnGQzqBMrEfnY";
-
-        fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                // If the response is successful, show the success message and disable the button
-                const submitButton = document.querySelector(`#week${weekNo} ~ button`);
-                const successMessage = document.createElement('span');
-                successMessage.textContent = "Successfully Updated";
-                successMessage.style.color = 'green';
-                successMessage.style.marginLeft = '10px';
-
-                // Disable the button
-                submitButton.disabled = true;
-
-                // Remove any existing success messages
-                const existingMessage = submitButton.nextElementSibling;
-                if (existingMessage) {
-                    existingMessage.remove();
-                }
-
-                // Append the new success message
-                submitButton.insertAdjacentElement('afterend', successMessage);
-            })
-            .catch(error => console.error('Error:', error));
-    }
-}
-
-
-
-
-// Open the modal for editing/viewing picks
-function openModal(entryId, isDisqualified) {
-    const modal = document.getElementById('picksModal');
-    const form = document.getElementById('picksForm');
-
-    // Clear previous form fields
-    form.innerHTML = '';
-
-    const poolEntries = JSON.parse(sessionStorage.getItem('pool_entries'));
-    const entry = poolEntries.find(e => e.dvuid === entryId);
-
-    if (entry) {
-        // Array to store current selections
-        let selectedTeams = [];
-
-        entry.weeks.forEach(week => {
-            const label = document.createElement('label');
-            label.textContent = `Week ${week.week_no}`;
-            form.appendChild(label);
-
-            const select = document.createElement('select');
-            select.id = `week${week.week_no}`;
-            select.disabled = week.locked || isDisqualified;
-
-            const teamOptions = JSON.parse(sessionStorage.getItem('team_options'));
-
-            teamOptions.forEach(team => {
-                const option = document.createElement('option');
-                option.value = team;
-                option.textContent = team;
-                if (team === week.selection) {
-                    option.selected = true;
-                    selectedTeams.push(team); // Track selected teams
-                }
-                select.appendChild(option);
-            });
-
-            form.appendChild(select);
-
-            // Create a submit button for each week
-            const submitButton = document.createElement('button');
-            submitButton.type = 'button';
-            //submitButton.textContent = `Update Week ${week.week_no}`;
-            //submitButton.disabled = true; // Initially disabled
-            submitButton.style.marginBottom = '15px'; // Add some space below the button
-
-           // Change button text if the week is locked
-            if (week.locked) {
-                submitButton.textContent = "This week has been LOCKED";
-                submitButton.disabled = true; // Disable the button since it's locked
-            } else if (isDisqualified) {
-                submitButton.textContent = "Disqualified";
-                submitButton.disabled = true; // Disable the button if disqualified
-            } else {
-                submitButton.textContent = `Update Week ${week.week_no}`;
-                submitButton.disabled = true; // Initially disabled, enabled after change
-                //submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
-            }
-
-
-
-
-           
-
-
-            // Create the alert message
-            const alertMessage = document.createElement('span');
-            alertMessage.textContent = "*** This team has already been picked in another week ***";
-            alertMessage.style.color = 'red';
-            alertMessage.style.display = 'none'; // Initially hidden
-            form.appendChild(alertMessage);
-
-            // Enable button only if a change is detected and no duplicate selections
-            select.addEventListener('change', function() {
-                // Check for duplicates
-                const selectedValue = select.value;
-                if (selectedTeams.includes(selectedValue) && selectedValue !== week.selection) {
-                    alertMessage.style.display = 'inline';
-                    submitButton.disabled = true;
-                } else {
-                    alertMessage.style.display = 'none';
-                    submitButton.disabled = (select.value === week.selection || isDisqualified);
-                }
-
-                // Update the selectedTeams array
-                selectedTeams = entry.weeks.map(week => document.getElementById(`week${week.week_no}`).value);
-            });
-
-            // Disable the submit button if the week is locked or the entry is disqualified
-            if (week.locked || isDisqualified) {
-                submitButton.disabled = true;
-            } else {
-                submitButton.onclick = () => handleWeekSubmission(entry.dvuid, week.week_no);
-            }
-
-            form.appendChild(submitButton);
-            form.appendChild(document.createElement('hr'));
-            form.appendChild(document.createElement('br'));
-        });
-    }
-
-    modal.style.display = 'block';
-}
-
-// Close the modal
-function closeModal() {
-    document.getElementById('picksModal').style.display = 'none';
-}
-
-// Ensure the modal closes when the user clicks outside of it
-window.onclick = function(event) {
-    const modal = document.getElementById('picksModal');
-    if (event.target === modal) {
-        modal.style.display = 'none';
-    }
-}
-      </script>
-      <div id="overlay"></div>
-      <div id="loading" style="display:none;">
-         <div class="spinner"></div>
-         <p>Loading...</p>
-         <h3>This may take longer for users with multiple entries!</h3>
+      <div style="margin-top:16px; display:flex; gap:8px; justify-content:flex-end">
+        <button class="btn btn-outline" id="cancelModalBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveAllBtn">
+          <span class="spinner" style="display:none"></span>
+          Save all changes
+        </button>
       </div>
-   </body>
+    </div>
+  </div>
+
+  <div id="overlay"></div>
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Loading…</p>
+  </div>
+</body>
 </html>
