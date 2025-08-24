@@ -40,26 +40,22 @@
     <img src="logo.png" alt="Logo">
   </footer>
 
-  <!-- Your existing logic -->
   <script defer src="script.js"></script>
-  <!-- UI helpers (overlay + toasts) -->
   <script defer src="ui.js"></script>
 
   <div id="overlay"></div>
   <div id="loading">
     <div class="box">
       <div class="spinner"></div>
-      <div class="loader-text">Loading…</div>
+      <div class="loader-text">Signing you in…</div>
     </div>
   </div>
 
   <script>
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
+    // Show the blocking loader and let script.js navigate on success/failure.
+    document.getElementById('loginForm').addEventListener('submit', (e)=>{
       if (window.UI) UI.showLoader('Signing you in…');
-      try { handleLogin(e); } finally {
-        // Hide the loader after a small delay to allow handleLogin to finish/hide itself
-        setTimeout(() => { if (window.UI) UI.hideLoader(); }, 1000);
-      }
+      handleLogin(e); // Do NOT hide loader here; page will redirect on outcome.
     });
   </script>
 </body>
