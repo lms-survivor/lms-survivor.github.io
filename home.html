@@ -95,7 +95,7 @@
   };
 
   // ------------ CONFIG (paste your real Save URL) ------------
-  const SAVE_PICK_URL = 'YOUR_SAVE_PICK_URL_HERE';  // keep your exact endpoint
+  const SAVE_PICK_URL = 'YOUR_SAVE_PICK_URL_HERE';
 
   // ------------ SESSION / STATE ------------
   (function guard(){
@@ -112,7 +112,6 @@
   let poolEntries = [];
   try { poolEntries = JSON.parse(sessionStorage.getItem('pool_entries') || '[]'); } catch(_) {}
 
-  // provided by your login response (if you don't store it, we’ll fall back)
   let TEAM_OPTIONS = [];
   try { TEAM_OPTIONS = JSON.parse(sessionStorage.getItem('team_options') || '[]'); } catch(_) {}
   if (!Array.isArray(TEAM_OPTIONS) || TEAM_OPTIONS.length === 0) {
@@ -167,7 +166,7 @@
 
     for (const entry of poolEntries){
       const tr = document.createElement('tr');
-      if (entry.dvuid === currentEntryDvuid) tr.classList.add('selected-row');  // highlight selected
+      if (entry.dvuid === currentEntryDvuid) tr.classList.add('selected-row');
 
       const tdName = document.createElement('td');
       tdName.textContent = entry.lms_display_name || entry.entry_name || 'Entry';
@@ -206,6 +205,55 @@
     return false;
   }
 
+  // shared save routine (both Save and Clear call this)
+  async function saveSelection(entry, weekObj, newValue, pending) {
+    // Normalize: blank => null for API
+    const apiSelection = (newValue === '') ? null : newValue;
+
+    // BYE + uniqueness only for real team values
+    if (apiSelection && apiSelection !== 'OUT') {
+      if (BYE_MAP[apiSelection] === weekObj.week_no) {
+        if (window.UI) UI.toast.error(`${apiSelection} is on a BYE in Week ${weekObj.week_no}.`);
+        return false;
+      }
+      if (teamAlreadyUsed(entry, weekObj.week_no, apiSelection, pending)) {
+        if (window.UI) UI.toast.error('You can only use each team once for this entry.');
+        return false;
+      }
+    }
+
+    try{
+      if (window.UI) UI.showLoader('Saving your pick…');
+      const payload = { dvuid: entry.dvuid, week_no: weekObj.week_no, selection: apiSelection };
+
+      const res = await fetch(SAVE_PICK_URL, {
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok) throw new Error('Save failed: HTTP '+res.status);
+
+      // Optimistic in-memory update
+      const updated = (poolEntries || []).map(pe=>{
+        if (pe.dvuid !== entry.dvuid) return pe;
+        const weeks2 = (pe.weeks || []).map(ww=>{
+          if (ww.week_no === weekObj.week_no) return { ...ww, selection: apiSelection };
+          return ww;
+        });
+        return { ...pe, weeks: weeks2 };
+      });
+      poolEntries = updated;
+      sessionStorage.setItem('pool_entries', JSON.stringify(updated));
+      return true;
+    }catch(err){
+      console.error(err);
+      if (window.UI) UI.toast.error('Could not save pick. Please try again.');
+      return false;
+    }finally{
+      if (window.UI) UI.hideLoader();
+    }
+  }
+
   function renderWeeks(entry){
     weeksWrap.innerHTML = '';
 
@@ -242,6 +290,11 @@
       saveBtn.className = 'btn primary';
       saveBtn.textContent = 'Save Pick';
 
+      const clearBtn = document.createElement('button');
+      clearBtn.type = 'button';
+      clearBtn.className = 'btn secondary';
+      clearBtn.textContent = 'Clear';
+
       const success = document.createElement('span');
       success.className = 'success-msg';
 
@@ -249,9 +302,9 @@
       right.className = 'lock-label chip ' + (w.locked ? 'lock' : 'active');
       right.textContent = w.locked ? 'Locked' : (w.deadline_text || 'Open');
 
-      // Build options with BYE + uniqueness filtering (but keep current value visible)
+      // Build options with BYE + uniqueness filtering (keep current saved value visible)
       function buildOptions(){
-        const current = w.selection || '';
+        const current = w.selection ?? '';
         const all = TEAM_OPTIONS.slice(); // includes "", OUT, teams
         select.innerHTML = '';
 
@@ -267,15 +320,12 @@
           if (t === '' || t === 'OUT'){
             const opt = document.createElement('option');
             opt.value = t; opt.textContent = t === '' ? '— Select Team —' : 'OUT';
-            if (current === t) opt.selected = true;
+            if (current === t || (current == null && t === '')) opt.selected = true;
             select.appendChild(opt);
             continue;
           }
 
-          // Keep the current saved value visible even if it would be filtered
           const isCurrent = (t === current);
-
-          // BYE filter and uniqueness filter
           const isBye = (BYE_MAP[t] === w.week_no);
           const usedElsewhere = used.has(t);
 
@@ -290,24 +340,30 @@
       buildOptions();
 
       const entryDisabled = isEntryDisabled(entry);
+      let initial = (w.selection ?? '');               // '' if null
+      let hasChanged = false;
+      const hasExistingSaved = initial !== '';
+
+      // Clear button: only when there is an existing saved pick
+      clearBtn.style.display = hasExistingSaved ? 'inline-flex' : 'none';
+      clearBtn.disabled = !hasExistingSaved;
 
       if (entryDisabled){
         select.disabled = true;
         saveBtn.disabled = true;
+        clearBtn.disabled = true;
         saveBtn.title = 'Entry cannot make picks';
       } else if (w.locked){
         select.disabled = true;
         saveBtn.disabled = true;
+        clearBtn.disabled = true;
         saveBtn.textContent = 'This week has been LOCKED';
         saveBtn.title = 'This week has been LOCKED';
       } else {
-        let initial = (w.selection || '');
-        let hasChanged = false;
-
         select.addEventListener('change', ()=>{
           const newVal = select.value || '';
-          // Enforce uniqueness immediately
-          if (teamAlreadyUsed(entry, w.week_no, newVal, pending)){
+          // Uniqueness guard only for real team values
+          if (newVal && newVal !== 'OUT' && teamAlreadyUsed(entry, w.week_no, newVal, pending)){
             if (window.UI) UI.toast.error('You can only use each team once for this entry.');
             select.value = initial; // revert
             return;
@@ -317,72 +373,61 @@
           hasChanged = (newVal !== initial);
           saveBtn.disabled = !hasChanged;
 
-          // Rebuild other selects to reflect uniqueness (simple approach: this one rebuilds itself)
+          // Only show Clear when the original saved pick exists
+          clearBtn.style.display = hasExistingSaved ? 'inline-flex' : 'none';
+          clearBtn.disabled = !hasExistingSaved;
+
+          // Rebuild options to reflect uniqueness
           buildOptions();
-          // Ensure the current chosen value stays selected after rebuild
           select.value = newVal;
         });
 
         saveBtn.disabled = true;
         saveBtn.addEventListener('click', async ()=>{
-          const chosen = select.value || '';
-          // Final guard: uniqueness + BYE on save
-          if (BYE_MAP[chosen] === w.week_no){
-            if (window.UI) UI.toast.error(`${chosen} is on a BYE in Week ${w.week_no}.`);
-            return;
+          const chosen = select.value || ''; // '' means clear
+          const ok = await saveSelection(entry, w, chosen, pending);
+          if (!ok) return;
+
+          // Update local UI state
+          const chosenForUi = (chosen === '') ? '' : chosen;
+          pending[w.week_no] = chosenForUi;
+          initial = chosenForUi;
+          hasChanged = false;
+          saveBtn.disabled = true;
+          success.textContent = chosen === '' ? 'Cleared' : 'Successfully Updated';
+          if (window.UI) UI.toast.success(success.textContent);
+
+          // After clear, reflect empty UI, hide Clear
+          if (chosen === '') {
+            select.value = '';
+            clearBtn.style.display = 'none';
+            clearBtn.disabled = true;
           }
-          if (teamAlreadyUsed(entry, w.week_no, chosen, pending)){
-            if (window.UI) UI.toast.error('You can only use each team once for this entry.');
-            return;
-          }
+          buildOptions();
+          select.value = chosenForUi;
+        });
 
-          try{
-            if (window.UI) UI.showLoader('Saving your pick…');
+        clearBtn.addEventListener('click', async ()=>{
+          // Explicit clear (send null)
+          const ok = await saveSelection(entry, w, '', pending);
+          if (!ok) return;
 
-            const payload = {
-              dvuid: entry.dvuid,
-              week_no: w.week_no,
-              selection: chosen
-            };
-
-            const res = await fetch(SAVE_PICK_URL, {
-              method:'POST',
-              headers:{'content-type':'application/json'},
-              body: JSON.stringify(payload)
-            });
-            if(!res.ok) throw new Error('Save failed: HTTP '+res.status);
-
-            // Optimistic in-memory update (and pending map)
-            const updated = (poolEntries || []).map(pe=>{
-              if (pe.dvuid !== entry.dvuid) return pe;
-              const weeks2 = (pe.weeks || []).map(ww=>{
-                if (ww.week_no === w.week_no) return { ...ww, selection: chosen };
-                return ww;
-              });
-              return { ...pe, weeks: weeks2 };
-            });
-            poolEntries = updated;
-            sessionStorage.setItem('pool_entries', JSON.stringify(updated));
-            pending[w.week_no] = chosen;
-            initial = chosen;
-            hasChanged = false;
-            saveBtn.disabled = true;
-            success.textContent = 'Successfully Updated';
-            if (window.UI) UI.toast.success('Successfully Updated');
-
-            // Rebuild options to reflect the new “used” set
-            buildOptions();
-            select.value = chosen;
-          } catch(err){
-            console.error(err);
-            if (window.UI) UI.toast.error('Could not save pick. Please try again.');
-          } finally {
-            if (window.UI) UI.hideLoader();
-          }
+          // Update UI after clear
+          delete pending[w.week_no];
+          initial = '';
+          hasChanged = false;
+          saveBtn.disabled = true;
+          success.textContent = 'Cleared';
+          if (window.UI) UI.toast.success('Cleared');
+          select.value = '';
+          clearBtn.style.display = 'none';
+          clearBtn.disabled = true;
+          buildOptions();
+          select.value = '';
         });
       }
 
-      card.append(title, select, saveBtn, success, right);
+      card.append(title, select, saveBtn, clearBtn, success, right);
       weeksWrap.appendChild(card);
     }
   }
