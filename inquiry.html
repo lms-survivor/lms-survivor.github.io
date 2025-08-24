@@ -73,10 +73,10 @@
   </div>
 
   <script>
-    document.getElementById('registrationForm').addEventListener('submit', (e)=>{
+    document.getElementById('registrationForm').addEventListener('submit', (e) => {
       if (window.UI) UI.showLoader('Submitting your request…');
       try { handleRegistration(e); } finally {
-        setTimeout(()=>{ if (window.UI) UI.hideLoader(); }, 1000);
+        setTimeout(() => { if (window.UI) UI.hideLoader(); }, 1000);
       }
     });
   </script>

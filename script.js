@@ -46,9 +46,16 @@ function handleLogin(event) {
     return response.json();
 })
     .then(data => {
+        // Persist core profile values in sessionStorage.  First/last name are stored
+        // separately as well as together under `name` for convenience.  Combining
+        // names here avoids having to reassemble them in every view and ensures
+        // consistent formatting.  Note: if either first or last name is missing
+        // the combined name will gracefully fallback to whichever is present.
         sessionStorage.setItem('email', data.email_address);
         sessionStorage.setItem('first_name', data.first_name);
         sessionStorage.setItem('last_name', data.last_name);
+        const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ').trim();
+        sessionStorage.setItem('name', fullName);
         sessionStorage.setItem('phone', data.phone_number);
         sessionStorage.setItem('pool_entries', JSON.stringify(data.pool_entries));
         sessionStorage.setItem('team_options', JSON.stringify(data.team_options));

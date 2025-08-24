@@ -1,49 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Last Man Standing - Registration Rejected</title>
-    <link rel="stylesheet" href="style.css">
-    <script defer src="script.js"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Last Man Standing – Access Rejected</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-
-    <header>
+  <header>
+    <div class="wrap">
+      <div class="brand">
         <h1>Last Man Standing</h1>
         <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
-    </header>
-
-    <div class="container">
-        <h2>Registration Rejected</h2>
-        <p>Your registration request has been rejected and you are not eligible to join the tournament.</p>
-        <p>If you would like further explanation, please contact us through the form below.</p>
-
-        <!-- Form 4: Rejected Inquiry Form -->
-        <form id="rejectedForm">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" value="" readonly required>
-
-            <label for="message">Message</label>
-            <textarea id="message" name="message" rows="5" required></textarea>
-
-            <input type="submit" value="Submit">
-        </form>
+      </div>
     </div>
-
-    <footer>
-        <p>&copy; 2024 optimAIze plus LLC. All Rights Reserved.</p>
-        <img src="logo.png" alt="Logo" style="width: 10%; background-color: white; padding: 5px;">
-
-    </footer>
-
-    <script>
-        // Pre-fill the email field with the user's email from session storage
-        document.getElementById('email').value = sessionStorage.getItem('email');
-
-        // Ensure that the rejected form submission triggers the correct flow
-        document.getElementById('rejectedForm').addEventListener('submit', handleRejectedInquiry);
-    </script>
-
+  </header>
+  <main class="container">
+    <div class="card">
+      <h2>Access Denied</h2>
+      <p>We’re sorry, but your request to join the pool has been rejected. If you believe this is an error, please contact the pool administrator for assistance.</p>
+      <div class="actions">
+        <a class="btn secondary" href="index.html">Back to Login</a>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <p>&copy; 2025 optimAIze plus LLC. All Rights Reserved.</p>
+    <img src="logo.png" alt="Logo">
+  </footer>
 </body>
 </html>

@@ -54,13 +54,11 @@
   </div>
 
   <script>
-    // Keep your existing handler to avoid breaking endpoints
-    document.getElementById('loginForm').addEventListener('submit', (e)=>{
-      // Optional: show a nicer loader without changing your logic
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
       if (window.UI) UI.showLoader('Signing you in…');
       try { handleLogin(e); } finally {
-        // Your handlers already hide overlay. If not, UI.hideLoader() after completion.
-        setTimeout(()=>{ if (window.UI) UI.hideLoader(); }, 1000);
+        // Hide the loader after a small delay to allow handleLogin to finish/hide itself
+        setTimeout(() => { if (window.UI) UI.hideLoader(); }, 1000);
       }
     });
   </script>
