@@ -3,92 +3,312 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Last Man Standing — Home</title>
+  <title>Last Man Standing – Home</title>
   <link rel="stylesheet" href="style.css"/>
-  <script defer src="script.js"></script>
 </head>
-<body data-page="home">
+<body>
   <header>
-    <div class="header-inner">
-      <a class="brand" href="home.html">
-        <img src="logo.png" alt="LMS Logo"/>
-        <div class="title">Last Man Standing</div>
-      </a>
+    <div class="wrap">
+      <div class="brand">
+        <h1>Last Man Standing</h1>
+        <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
+      </div>
       <div class="header-actions">
-        <span id="welcomeName" class="badge">Welcome</span>
-        <button id="signOutButton" class="btn btn-outline">Sign out</button>
+        <button class="btn danger" id="signOutBtn">Sign Out</button>
       </div>
     </div>
   </header>
 
   <main class="container">
-    <div class="grid">
-      <div class="card">
-        <div class="card-hd">
-          <h2>Your entries</h2>
-          <div class="subtle">Edit picks, see status, and check locks.</div>
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <h2>Your Profile</h2>
+          <p><strong>Name:</strong> <span id="userName"></span></p>
+          <p><strong>Email:</strong> <span id="userEmail"></span></p>
+          <p><strong>Phone:</strong> <span id="userPhone"></span></p>
         </div>
-        <div class="card-bd">
-          <div style="overflow:auto">
-            <table class="table" id="entriesTable">
-              <thead>
-                <tr>
-                  <th>Entry</th>
-                  <th>Status</th>
-                  <th>Latest Pick</th>
-                  <th>Weeks Completed</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="entriesTbody">
-                <!-- filled by script -->
-              </tbody>
-            </table>
+      </div>
+
+      <div class="col">
+        <div class="card">
+          <h2>Payment Info</h2>
+          <p>The cost per entry is <strong>$50.00</strong>.</p>
+          <p>Pay Kevin via cash, Venmo, or PayPal.</p>
+          <div class="actions">
+            <a class="btn secondary" href="#" target="_blank" rel="noopener">Pay with Venmo</a>
+            <a class="btn secondary" href="#" target="_blank" rel="noopener">Pay with PayPal</a>
           </div>
         </div>
       </div>
-
-      <div class="card">
-        <div class="card-hd">
-          <h2>Notes</h2>
-          <div class="subtle">Rules & reminders</div>
-        </div>
-        <div class="card-bd">
-          <ul>
-            <li>Once a week is <span class="pill amber">LOCKED</span>, picks for that week are disabled.</li>
-            <li>If an entry is <span class="pill red">DISQUALIFIED</span>, picks are disabled for that entry.</li>
-            <li>“Successfully Updated” appears next to a week’s Save button after a successful save, and disappears if you change the selection again.</li>
-          </ul>
-        </div>
-      </div>
     </div>
+
+    <section class="section">
+      <div class="card">
+        <h2>Your Pool Entries</h2>
+        <div id="entryNotice" class="notice" style="display:none"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Entry Name</th>
+              <th>Status</th>
+              <th>Paid</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="entriesTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card">
+        <h2>Weekly Picks</h2>
+        <div id="weeksWrap"></div>
+      </div>
+    </section>
   </main>
 
-  <!-- Picks Modal -->
-  <div class="modal" id="picksModal" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-content">
-      <span class="close" id="closeModal" aria-label="Close">&times;</span>
-      <h2 id="modalTitle">Edit Picks</h2>
-      <div id="entryStatusRow" style="margin:6px 0 14px"></div>
+  <footer>
+    <p>&copy; 2025 optimAIze plus LLC. All Rights Reserved.</p>
+    <img src="logo.png" alt="Logo">
+  </footer>
 
-      <div class="picks" id="weeksGrid">
-        <!-- week cards inserted here -->
-      </div>
-
-      <div style="margin-top:16px; display:flex; gap:8px; justify-content:flex-end">
-        <button class="btn btn-outline" id="cancelModalBtn">Cancel</button>
-        <button class="btn btn-primary" id="saveAllBtn">
-          <span class="spinner" style="display:none"></span>
-          Save all changes
-        </button>
-      </div>
-    </div>
-  </div>
+  <!-- UI helpers -->
+  <script defer src="ui.js"></script>
 
   <div id="overlay"></div>
   <div id="loading">
-    <div class="spinner"></div>
-    <p>Loading…</p>
+    <div class="box">
+      <div class="spinner"></div>
+      <div class="loader-text">Loading…</div>
+    </div>
   </div>
+
+  <script>
+  // ---------- Config: paste your existing Flow URL here (same as old file) ----------
+  const SAVE_PICK_URL = 'YOUR_SAVE_PICK_URL_HERE'; // keep your exact endpoint
+  // ----------------------------------------------------------------------------------
+
+  // Guard: require approved session
+  (function checkIfLoggedIn(){
+    const isLoggedIn = sessionStorage.getItem('approved') === 'true';
+    if (!isLoggedIn) window.location.href = 'index.html';
+  })();
+
+  const ELIM_MSG = 'Entry cannot make picks';
+  const LOCK_MSG = 'This week has been LOCKED';
+
+  // Read session state your existing login stored
+  const profile = {
+    name: sessionStorage.getItem('name') || '',
+    email: sessionStorage.getItem('email') || '',
+    phone: sessionStorage.getItem('phone') || ''
+  };
+
+  // Your login flow already sets this; we use it
+  let poolEntries = [];
+  try {
+    poolEntries = JSON.parse(sessionStorage.getItem('pool_entries') || '[]');
+  } catch(_) { poolEntries = []; }
+
+  // Render profile
+  document.getElementById('userName').textContent = profile.name || '—';
+  document.getElementById('userEmail').textContent = profile.email || '—';
+  document.getElementById('userPhone').textContent = profile.phone || '—';
+
+  // Sign out clears session and returns to login
+  document.getElementById('signOutBtn').addEventListener('click', ()=>{
+    sessionStorage.clear();
+    window.location.href = 'index.html';
+  });
+
+  // Build entries table + weeks UI
+  const entriesTbody = document.getElementById('entriesTableBody');
+  const weeksWrap = document.getElementById('weeksWrap');
+  const entryNotice = document.getElementById('entryNotice');
+
+  // Helper: status pill
+  function pill(status){
+    const span = document.createElement('span');
+    span.className = 'chip ' + status.toLowerCase();
+    span.textContent = status;
+    return span;
+  }
+
+  // Helper: get readable paid status
+  function paidPill(val){
+    const span = document.createElement('span');
+    span.className = 'chip ' + (val ? 'active' : 'pending');
+    span.textContent = val ? 'Paid' : 'Unpaid';
+    return span;
+  }
+
+  // Detect if a whole entry is disqualified/eliminated
+  function isEntryDisabled(entry){
+    const s = (entry.status || '').toLowerCase();
+    return s === 'disqualified' || s === 'eliminated';
+  }
+
+  // Render Entries table
+  function renderEntries(){
+    entriesTbody.innerHTML = '';
+    if (!poolEntries.length){
+      entryNotice.style.display = 'block';
+      entryNotice.textContent = 'No entries yet. If you just registered, your access may still be pending.';
+      return;
+    }
+    entryNotice.style.display = 'none';
+
+    for (const entry of poolEntries){
+      const tr = document.createElement('tr');
+
+      const tdName = document.createElement('td'); tdName.textContent = entry.entry_name || entry.name || 'Entry';
+      const tdStatus = document.createElement('td'); tdStatus.appendChild(pill((entry.status || 'Active')));
+      const tdPaid = document.createElement('td'); tdPaid.appendChild(paidPill(!!entry.paid_in_full));
+
+      const tdActions = document.createElement('td');
+      const btn = document.createElement('button');
+      btn.className = 'btn primary';
+      btn.textContent = 'View / Edit Picks';
+      btn.addEventListener('click', ()=> renderWeeks(entry));
+      tdActions.appendChild(btn);
+
+      tr.append(tdName, tdStatus, tdPaid, tdActions);
+      entriesTbody.appendChild(tr);
+    }
+  }
+
+  // Render Weeks grid for a selected entry
+  function renderWeeks(entry){
+    weeksWrap.innerHTML = '';
+
+    if (isEntryDisabled(entry)){
+      const note = document.createElement('div');
+      note.className = 'notice';
+      note.textContent = 'This entry is disqualified/eliminated. Picks are locked for all weeks.';
+      weeksWrap.appendChild(note);
+    }
+
+    const weeks = Array.isArray(entry.weeks) ? entry.weeks : [];
+    // Expected shape for each week object (adjusts gracefully):
+    // { week_no, locked (bool), selection (team string), deadline_text }
+    weeks.sort((a,b) => (a.week_no||0) - (b.week_no||0));
+
+    for (const w of weeks){
+      const card = document.createElement('div');
+      card.className = 'week-card';
+
+      const title = document.createElement('div');
+      title.className = 'week-title';
+      title.textContent = `Week ${w.week_no ?? '—'}`;
+
+      const select = document.createElement('select');
+      select.className = 'input';
+      select.style.maxWidth = '260px';
+
+      // Team options: reuse existing selection list if provided; else fallback basic
+      const teams = Array.isArray(w.teams) && w.teams.length ? w.teams : [
+        '', 'ARI','ATL','BAL','BUF','CAR','CHI','CIN','CLE','DAL','DEN','DET','GB','HOU','IND','JAX','KC','LV','LAC','LAR','MIA','MIN','NE','NO','NYG','NYJ','PHI','PIT','SEA','SF','TB','TEN','WSH'
+      ];
+      for (const t of teams){
+        const opt = document.createElement('option');
+        opt.value = t; opt.textContent = t || '— Select Team —';
+        if ((w.selection || '') === t) opt.selected = true;
+        select.appendChild(opt);
+      }
+
+      const saveBtn = document.createElement('button');
+      saveBtn.type = 'button';
+      saveBtn.className = 'btn primary';
+      saveBtn.textContent = 'Save Pick';
+
+      const success = document.createElement('span');
+      success.className = 'success-msg';
+      success.textContent = '';
+
+      // LOCK / ENTRY DISQUALIFY rules:
+      const entryDisabled = isEntryDisabled(entry);
+      if (entryDisabled){
+        select.disabled = true;
+        saveBtn.disabled = true;
+        saveBtn.title = ELIM_MSG;
+      } else if (w.locked){
+        select.disabled = true;
+        saveBtn.disabled = true;
+        saveBtn.textContent = LOCK_MSG;
+        saveBtn.title = LOCK_MSG;
+      } else {
+        // Editable row rules:
+        // Disable button until selection changes from last saved
+        let hasChanged = false;
+        const initial = (w.selection || '');
+        saveBtn.disabled = true;
+
+        select.addEventListener('change', ()=>{
+          success.textContent = '';
+          hasChanged = (select.value || '') !== initial;
+          saveBtn.disabled = !hasChanged;
+        });
+
+        saveBtn.addEventListener('click', async ()=>{
+          if (!select.value){ return; }
+          try{
+            if (window.UI) UI.showLoader('Saving your pick…');
+
+            const payload = {
+              dvuid: entry.dvuid,                  // keep your exact identifiers
+              week_no: w.week_no,
+              selection: select.value
+            };
+
+            const res = await fetch(SAVE_PICK_URL, {
+              method:'POST',
+              headers:{'content-type':'application/json'},
+              body: JSON.stringify(payload)
+            });
+
+            if(!res.ok) throw new Error('Save failed: HTTP '+res.status);
+            // If your flow returns JSON, you can read it here:
+            // const data = await res.json();
+
+            // Optimistic state update in sessionStorage
+            const updated = (poolEntries || []).map(pe=>{
+              if (pe.dvuid !== entry.dvuid) return pe;
+              const weeks2 = (pe.weeks || []).map(ww=>{
+                if (ww.week_no === w.week_no) return { ...ww, selection: select.value };
+                return ww;
+              });
+              return { ...pe, weeks: weeks2 };
+            });
+            poolEntries = updated;
+            sessionStorage.setItem('pool_entries', JSON.stringify(updated));
+
+            // Success UX
+            success.textContent = 'Successfully Updated';
+            saveBtn.disabled = true; // until user changes again
+            if (window.UI) UI.toast.success('Successfully Updated');
+          } catch(err){
+            console.error(err);
+            if (window.UI) UI.toast.error('Could not save pick. Please try again.');
+          } finally {
+            if (window.UI) UI.hideLoader();
+          }
+        });
+      }
+
+      const right = document.createElement('div');
+      right.className = 'lock-label chip ' + (w.locked ? 'lock' : 'active');
+      right.textContent = w.locked ? 'Locked' : (w.deadline_text || 'Open');
+
+      card.append(title, select, saveBtn, success, right);
+      weeksWrap.appendChild(card);
+    }
+  }
+
+  // Initial render
+  renderEntries();
+  if (poolEntries[0]) renderWeeks(poolEntries[0]); // show first entry by default
+  </script>
 </body>
 </html>
