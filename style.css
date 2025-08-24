@@ -75,3 +75,7 @@ tbody tr:hover{background:rgba(79,140,255,.08)}
 .lock-label{margin-left:auto}
 .success-msg{color:var(--success);font-weight:800;margin-left:12px}
 .notice{background:#101a34;border:1px dashed #2a3e66;border-radius:12px;padding:12px;color:#cfe0ff}
+
+/* Highlight the currently selected entry row */
+.selected-row { background: rgba(79,140,255,.08) !important; }
+.selected-row td { border-bottom-color: #2c3f67 !important; }
