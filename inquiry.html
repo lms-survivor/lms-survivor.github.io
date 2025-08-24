@@ -3,79 +3,82 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Last Man Standing — Request Access</title>
+  <title>Last Man Standing – Registration</title>
   <link rel="stylesheet" href="style.css"/>
-  <script defer src="script.js"></script>
 </head>
-<body data-page="inquiry">
+<body>
   <header>
-    <div class="header-inner">
-      <a class="brand" href="index.html">
-        <img src="logo.png" alt="LMS Logo"/>
-        <div class="title">Last Man Standing</div>
-      </a>
-      <div class="header-actions">
-        <a class="btn btn-outline" href="index.html">Back to login</a>
+    <div class="wrap">
+      <div class="brand">
+        <h1>Last Man Standing</h1>
+        <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
       </div>
     </div>
   </header>
 
   <main class="container">
-    <div class="grid">
-      <div class="card">
-        <div class="card-hd">
-          <h2>Request access</h2>
-          <div class="subtle">We’ll email you a PIN when approved.</div>
-        </div>
-        <div class="card-bd">
-          <form id="registrationForm" novalidate>
-            <label class="label" for="first_name">First name</label>
-            <input class="input" id="first_name" name="first_name" required placeholder="Taylor"/>
-
-            <div style="height:12px"></div>
-
-            <label class="label" for="last_name">Last name</label>
-            <input class="input" id="last_name" name="last_name" required placeholder="Swift"/>
-
-            <div style="height:12px"></div>
-
-            <label class="label" for="email_address">Email</label>
-            <input class="input" id="email_address" name="email_address" type="email" required placeholder="you@example.com"/>
-
-            <div style="height:12px"></div>
-
-            <label class="label" for="phone_number">Phone (optional)</label>
-            <input class="input" id="phone_number" name="phone_number" placeholder="555-555-1234"/>
-
-            <div style="height:12px"></div>
-
-            <label class="label" for="entries_requested">Entries requested</label>
-            <select class="select" id="entries_requested" name="entries_requested" required>
-              <option value="1" selected>1 Entry</option>
-              <option value="2">2 Entries</option>
-              <option value="3">3 Entries</option>
-              <option value="4">4 Entries</option>
-              <option value="5">5 Entries</option>
-            </select>
-
-            <div style="height:16px"></div>
-            <button class="btn btn-primary" type="submit">
-              <span class="spinner" style="display:none"></span>
-              Submit request
-            </button>
-          </form>
-          <div class="help" style="margin-top:12px">
-            Already requested access? We’ll email you after approval — then sign in from the login page.
+    <div class="card">
+      <h2>Request Access</h2>
+      <form id="registrationForm" autocomplete="off">
+        <div class="row">
+          <div class="col">
+            <label for="first_name">First name</label>
+            <input class="input" id="first_name" name="first_name" required>
+          </div>
+          <div class="col">
+            <label for="last_name">Last name</label>
+            <input class="input" id="last_name" name="last_name" required>
           </div>
         </div>
-      </div>
+
+        <div class="row">
+          <div class="col">
+            <label for="phone">Phone</label>
+            <input class="input" id="phone" name="phone" inputmode="tel">
+          </div>
+          <div class="col">
+            <label for="email">Email</label>
+            <input class="input" id="email" name="email" type="email" required>
+          </div>
+        </div>
+
+        <label for="entries">Number of entries</label>
+        <input class="input" id="entries" name="entries" type="number" min="1" max="20" value="1" required>
+
+        <label for="reason">Notes (optional)</label>
+        <textarea class="input" id="reason" name="reason" rows="3"></textarea>
+
+        <div class="actions">
+          <button class="btn secondary" type="button" onclick="window.location.href='index.html'">Back</button>
+          <button class="btn primary" type="submit">Submit Request</button>
+        </div>
+      </form>
     </div>
   </main>
 
+  <footer>
+    <p>&copy; 2025 optimAIze plus LLC. All Rights Reserved.</p>
+    <img src="logo.png" alt="Logo">
+  </footer>
+
+  <script defer src="script.js"></script>
+  <script defer src="ui.js"></script>
+
   <div id="overlay"></div>
   <div id="loading">
-    <div class="spinner"></div>
-    <p>Submitting…</p>
+    <div class="box">
+      <div class="spinner"></div>
+      <div class="loader-text">Submitting…</div>
+    </div>
   </div>
+
+  <script>
+    document.getElementById('registrationForm').addEventListener('submit', (e)=>{
+      if (window.UI) UI.showLoader('Submitting your request…');
+      try { handleRegistration(e); } finally {
+        setTimeout(()=>{ if (window.UI) UI.hideLoader(); }, 1000);
+      }
+    });
+  </script>
 </body>
 </html>
