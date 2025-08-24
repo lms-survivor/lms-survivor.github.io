@@ -1,64 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Last Man Standing - Registration</title>
-    <link rel="stylesheet" href="style.css">
-    
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Last Man Standing — Request Access</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script defer src="script.js"></script>
 </head>
-<body>
-
-    <header>
-        <h1>Last Man Standing</h1>
-        <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
-    </header>
-
-    <div class="container">
-        <h2>Register to Join</h2>
-        <p>Please fill out the form below to request to join the tournament.</p>
-
-        <!-- Form 2: Registration Form -->
-        <form id="registrationForm">
-            <label for="first_name">First Name</label>
-            <input type="text" id="first_name" name="first_name" required>
-
-            <label for="last_name">Last Name</label>
-            <input type="text" id="last_name" name="last_name" required>
-
-            <label for="phone">Cell Phone Number</label>
-            <input type="text" id="phone" name="phone" required>
-
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="reason">Reason for Requesting to Join</label>
-            <textarea id="reason" name="reason" rows="5"></textarea>
-
-            <label for="entries">Number of Entries</label>
-            <input type="number" id="entries" name="entries" min="1" max="50" required>
-
-            <input type="submit" value="Submit Registration">
-        </form>
+<body data-page="inquiry">
+  <header>
+    <div class="header-inner">
+      <a class="brand" href="index.html">
+        <img src="logo.png" alt="LMS Logo"/>
+        <div class="title">Last Man Standing</div>
+      </a>
+      <div class="header-actions">
+        <a class="btn btn-outline" href="index.html">Back to login</a>
+      </div>
     </div>
+  </header>
 
-    <footer>
-        <p>&copy; 2024 optimAIze plus LLC. All Rights Reserved.</p>
-        <img src="logo.png" alt="Logo" style="width: 10%; background-color: white; padding: 5px;">
+  <main class="container">
+    <div class="grid">
+      <div class="card">
+        <div class="card-hd">
+          <h2>Request access</h2>
+          <div class="subtle">We’ll email you a PIN when approved.</div>
+        </div>
+        <div class="card-bd">
+          <form id="registrationForm" novalidate>
+            <label class="label" for="first_name">First name</label>
+            <input class="input" id="first_name" name="first_name" required placeholder="Taylor"/>
 
-    </footer>
+            <div style="height:12px"></div>
 
-    <script src="script.js"></script>
-    <script>
-        // Attach the handleRegistration function to the form's submit event
-        document.getElementById('registrationForm').addEventListener('submit', handleRegistration);
-    </script>
-<div id="overlay"></div>
-<div id="loading" style="display:none;">
+            <label class="label" for="last_name">Last name</label>
+            <input class="input" id="last_name" name="last_name" required placeholder="Swift"/>
+
+            <div style="height:12px"></div>
+
+            <label class="label" for="email_address">Email</label>
+            <input class="input" id="email_address" name="email_address" type="email" required placeholder="you@example.com"/>
+
+            <div style="height:12px"></div>
+
+            <label class="label" for="phone_number">Phone (optional)</label>
+            <input class="input" id="phone_number" name="phone_number" placeholder="555-555-1234"/>
+
+            <div style="height:12px"></div>
+
+            <label class="label" for="entries_requested">Entries requested</label>
+            <select class="select" id="entries_requested" name="entries_requested" required>
+              <option value="1" selected>1 Entry</option>
+              <option value="2">2 Entries</option>
+              <option value="3">3 Entries</option>
+              <option value="4">4 Entries</option>
+              <option value="5">5 Entries</option>
+            </select>
+
+            <div style="height:16px"></div>
+            <button class="btn btn-primary" type="submit">
+              <span class="spinner" style="display:none"></span>
+              Submit request
+            </button>
+          </form>
+          <div class="help" style="margin-top:12px">
+            Already requested access? We’ll email you after approval — then sign in from the login page.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="overlay"></div>
+  <div id="loading">
     <div class="spinner"></div>
-    <p>Loading...</p>
-    <h3>This may take longer for users with multiple entries!</h3>
-</div>
-
+    <p>Submitting…</p>
+  </div>
 </body>
 </html>
