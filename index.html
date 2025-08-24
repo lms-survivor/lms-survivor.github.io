@@ -3,69 +3,66 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Last Man Standing — Login</title>
+  <title>Last Man Standing – Login</title>
   <link rel="stylesheet" href="style.css"/>
-  <script defer src="script.js"></script>
 </head>
-<body data-page="login">
+<body>
   <header>
-    <div class="header-inner">
-      <a class="brand" href="index.html">
-        <img src="logo.png" alt="LMS Logo"/>
-        <div class="title">Last Man Standing</div>
-      </a>
-      <div class="header-actions">
-        <span class="badge">NFL Survivor Pool</span>
+    <div class="wrap">
+      <div class="brand">
+        <h1>Last Man Standing</h1>
+        <p>THE WORLD'S GREATEST FOOTBALL POOL!</p>
       </div>
     </div>
   </header>
 
   <main class="container">
-    <div class="grid grid-2">
-      <div class="card">
-        <div class="card-hd">
-          <h2>Welcome back</h2>
-          <div class="subtle">Sign in with your email and PIN.</div>
+    <div class="card">
+      <h2>Welcome back</h2>
+      <p class="muted">Enter the email + PIN from your invite.</p>
+      <form id="loginForm" autocomplete="off">
+        <label for="email">Email</label>
+        <input class="input" id="email" name="email" type="email" required />
+
+        <label for="pin">PIN</label>
+        <input class="input" id="pin" name="pin" type="password" inputmode="numeric" required />
+
+        <div class="actions">
+          <button class="btn secondary" type="button" onclick="window.location.href='inquiry.html'">Request Access</button>
+          <button class="btn primary" type="submit">Sign In</button>
         </div>
-        <div class="card-bd">
-          <form id="loginForm" novalidate>
-            <label class="label" for="email">Email</label>
-            <input class="input" type="email" id="email" name="email" autocomplete="email" required placeholder="you@example.com"/>
-
-            <div style="height:12px"></div>
-
-            <label class="label" for="pin">PIN</label>
-            <input class="input" type="password" id="pin" name="pin" inputmode="numeric" autocomplete="one-time-code" required placeholder="4–8 digit pin"/>
-
-            <div style="height:16px"></div>
-
-            <button class="btn btn-primary" type="submit">
-              <span class="spinner" style="display:none"></span>
-              Sign in
-            </button>
-            <a class="btn btn-outline" style="margin-left:8px" href="inquiry.html">Request access</a>
-          </form>
-          <div class="help" style="margin-top:12px">Don’t have a PIN yet? Request access and we’ll email you when approved.</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-hd">
-          <h2>About</h2>
-          <div class="subtle">THE WORLD'S GREATEST FOOTBALL POOL!</div>
-        </div>
-        <div class="card-bd">
-          <p>Pick one winner each week. You can’t reuse teams. Last entry standing wins.</p>
-          <p class="subtle">Locked weeks and other rules are enforced automatically once you sign in.</p>
-        </div>
-      </div>
+      </form>
     </div>
   </main>
 
+  <footer>
+    <p>&copy; 2025 optimAIze plus LLC. All Rights Reserved.</p>
+    <img src="logo.png" alt="Logo">
+  </footer>
+
+  <!-- Your existing logic -->
+  <script defer src="script.js"></script>
+  <!-- UI helpers (overlay + toasts) -->
+  <script defer src="ui.js"></script>
+
   <div id="overlay"></div>
   <div id="loading">
-    <div class="spinner"></div>
-    <p>Verifying…</p>
+    <div class="box">
+      <div class="spinner"></div>
+      <div class="loader-text">Loading…</div>
+    </div>
   </div>
+
+  <script>
+    // Keep your existing handler to avoid breaking endpoints
+    document.getElementById('loginForm').addEventListener('submit', (e)=>{
+      // Optional: show a nicer loader without changing your logic
+      if (window.UI) UI.showLoader('Signing you in…');
+      try { handleLogin(e); } finally {
+        // Your handlers already hide overlay. If not, UI.hideLoader() after completion.
+        setTimeout(()=>{ if (window.UI) UI.hideLoader(); }, 1000);
+      }
+    });
+  </script>
 </body>
 </html>
