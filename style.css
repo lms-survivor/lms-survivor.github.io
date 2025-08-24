@@ -79,3 +79,6 @@ tbody tr:hover{background:rgba(79,140,255,.08)}
 /* Highlight the currently selected entry row */
 .selected-row { background: rgba(79,140,255,.08) !important; }
 .selected-row td { border-bottom-color: #2c3f67 !important; }
+
+/* Keep inline buttons spaced in week cards */
+.week-card .btn + .btn { margin-left: 8px; }
