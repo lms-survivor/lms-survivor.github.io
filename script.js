@@ -350,3 +350,85 @@ document.addEventListener('DOMContentLoaded', function () {
         checkAccess();
     }
 });
+
+
+
+////////////
+
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  bindPage({
+    login(){
+      const form = $("#loginForm");
+      if(!form) return;
+      form.addEventListener("submit", async (e)=>{
+        e.preventDefault();
+        loader.show("Verifying your access…");
+        try{
+          // Replace this with your actual Flow 1 URL and body mapping:
+          const payload = {
+            email: $("#email").value.trim(),
+            pin: $("#pin").value.trim()
+          };
+          const url = "YOUR_FLOW_VERIFY_URL";
+          const data = await apiFetch(url, { method:"POST", body: payload });
+
+          // Persist returned user & options (using your keys)
+          sessionStorage.setItem('email', data.email_address);
+          sessionStorage.setItem('first_name', data.first_name);
+          sessionStorage.setItem('last_name', data.last_name);
+          sessionStorage.setItem('phone', data.phone_number);
+          sessionStorage.setItem('pool_entries', JSON.stringify(data.pool_entries));
+          sessionStorage.setItem('team_options', JSON.stringify(data.team_options));
+
+          switch (data.approved_status){
+            case "approved": sessionStorage.setItem('approved','true'); window.location.href = "home.html"; break;
+            case "pending":  toasts.ok("Registration Pending","We’ll email you when approved."); break;
+            case "rejected": toasts.err("Registration Rejected","Contact the commissioner if this seems wrong."); break;
+            default:         toasts.err("Invalid Credentials","Please check your email and PIN.");
+          }
+        }catch(err){
+          console.error(err);
+          toasts.err("Login failed", "Please try again.");
+        }finally{
+          loader.hide();
+        }
+      });
+    },
+    inquiry(){
+      const form = $("#registrationForm");
+      if(!form) return;
+      form.addEventListener("submit", async (e)=>{
+        e.preventDefault();
+        loader.show("Submitting your registration…");
+        try{
+          const payload = Object.fromEntries(new FormData(form).entries());
+          const url = "YOUR_FLOW_SUBMIT_INQUIRY_URL";
+          const data = await apiFetch(url, { method:"POST", body: payload });
+          // Your flow currently branches to separate pages; now use toasts:
+          if (data.inquiry_status === "submitted"){
+            toasts.ok("Submitted","We’ll review and email you soon.");
+            form.reset();
+          } else if (data.inquiry_status === "pending"){
+            toasts.ok("Already Pending","We’re still reviewing your request.");
+          } else {
+            toasts.err("Account Exists","Try signing in on the login page.");
+          }
+        }catch(err){
+          console.error(err);
+          toasts.err("Could not submit registration");
+        }finally{
+          loader.hide();
+        }
+      });
+    },
+    home(){
+      // Access check
+      const approved = sessionStorage.getItem('approved') === 'true';
+      if(!approved){ window.location.href = 'index.html'; return; }
+
+      // TODO (Phase 2 below): load entries, bind modal, lock/disq logic, success pill, etc.
+      // Leaving your existing logic in place is fine; we’ll improve it next.
+    }
+  });
+});
