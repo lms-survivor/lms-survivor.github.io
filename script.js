@@ -1,3 +1,80 @@
+// ---------- Core UI helpers ----------
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+const loader = {
+  show(msg="Working…"){
+    $("#overlay").style.display = "flex";
+    const l = $("#loading");
+    if(l){ l.style.display = "flex"; const p = l.querySelector("p"); if(p) p.textContent = msg; }
+  },
+  hide(){
+    $("#overlay").style.display = "none";
+    const l = $("#loading"); if(l) l.style.display = "none";
+  }
+};
+
+const toasts = {
+  wrap(){
+    let w = $(".toast-wrap");
+    if(!w){ w = document.createElement("div"); w.className = "toast-wrap"; document.body.appendChild(w); }
+    return w;
+  },
+  ok(title="Saved", msg=""){
+    const t = document.createElement("div");
+    t.className = "toast ok";
+    t.innerHTML = `<div><div class="title">${title}</div><div class="msg">${msg}</div></div>`;
+    this.wrap().appendChild(t); setTimeout(()=>t.remove(), 3500);
+  },
+  err(title="Error", msg="Try again."){
+    const t = document.createElement("div");
+    t.className = "toast err";
+    t.innerHTML = `<div><div class="title">${title}</div><div class="msg">${msg}</div></div>`;
+    this.wrap().appendChild(t); setTimeout(()=>t.remove(), 5000);
+  }
+};
+
+const session = {
+  set(k,v){ sessionStorage.setItem(k, JSON.stringify(v)); },
+  get(k,fb=null){ try{return JSON.parse(sessionStorage.getItem(k)) ?? fb;}catch{return fb;} },
+  del(k){ sessionStorage.removeItem(k); },
+  clear(){ sessionStorage.clear(); }
+};
+
+// Single place to add headers for your Power Automate endpoints if needed
+async function apiFetch(url, {method="GET", body=null, headers={}}={}){
+  const opts = { method, headers: { "Content-Type":"application/json", ...headers } };
+  if(body) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  if(!res.ok){
+    const text = await res.text().catch(()=> "");
+    throw new Error(`HTTP ${res.status} ${res.statusText}: ${text}`);
+  }
+  // Some of your flows return JSON; keep this safe:
+  try { return await res.json(); } catch { return {}; }
+}
+
+// Robust page binder (works on GitHub Pages subpaths)
+function bindPage(handlers){
+  const page = document.body.getAttribute("data-page");
+  if(!page) return;
+  const fn = handlers[page];
+  if(typeof fn === "function"){ fn(); }
+}
+
+// Sign out
+function handleSignOut(){
+  session.clear();
+  window.location.href = "index.html";
+}
+document.addEventListener("click", e=>{
+  const b = e.target.closest("#signOutButton");
+  if(b){ e.preventDefault(); handleSignOut(); }
+});
+
+
+
+
 // script.js
 
 function handleLogout() {
