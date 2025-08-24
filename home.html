@@ -84,359 +84,365 @@
     </div>
   </div>
 
-  <script>
-  // ------------ BYE WEEK MAP (2025) ------------
-  const BYE_MAP = {
-    "49ERS":14,"BEARS":5,"BENGALS":10,"BILLS":7,"BRONCOS":12,"BROWNS":9,"BUCCANEERS":9,
-    "CARDINALS":8,"CHARGERS":12,"CHIEFS":10,"COLTS":11,"COMMANDERS":12,"COWBOYS":10,
-    "DOLPHINS":12,"EAGLES":9,"FALCONS":5,"GIANTS":14,"JAGUARS":8,"JETS":9,"LIONS":8,
-    "PACKERS":5,"PANTHERS":14,"PATRIOTS":14,"RAIDERS":8,"RAMS":8,"RAVENS":7,"SAINTS":11,
-    "SEAHAWKS":8,"STEELERS":5,"TEXANS":6,"TITANS":10,"VIKINGS":6
-  };
+<script>
+/* -------------------- BYE WEEK MAP (2025) -------------------- */
+const BYE_MAP = {
+  "49ERS":14,"BEARS":5,"BENGALS":10,"BILLS":7,"BRONCOS":12,"BROWNS":9,"BUCCANEERS":9,
+  "CARDINALS":8,"CHARGERS":12,"CHIEFS":10,"COLTS":11,"COMMANDERS":12,"COWBOYS":10,
+  "DOLPHINS":12,"EAGLES":9,"FALCONS":5,"GIANTS":14,"JAGUARS":8,"JETS":9,"LIONS":8,
+  "PACKERS":5,"PANTHERS":14,"PATRIOTS":14,"RAIDERS":8,"RAMS":8,"RAVENS":7,"SAINTS":11,
+  "SEAHAWKS":8,"STEELERS":5,"TEXANS":6,"TITANS":10,"VIKINGS":6
+};
 
-  // ------------ CONFIG (paste your real Save URL) ------------
-  const SAVE_PICK_URL = 'https://prod-09.westus.logic.azure.com:443/workflows/67f71c8b4d83430b88587c634518e5b1/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9_LyaG3W0evcEgwJYEckhDw7E02dF4NnGQzqBMrEfnY';
+/* -------------------- CONFIG (paste your real Save URL) -------------------- */
+const SAVE_PICK_URL = 'YOUR_SAVE_PICK_URL_HERE';
 
-  // ------------ SESSION / STATE ------------
-  (function guard(){
-    const isLoggedIn = sessionStorage.getItem('approved') === 'true';
-    if (!isLoggedIn) window.location.href = 'index.html';
-  })();
+/* -------------------- SESSION / STATE -------------------- */
+(function guard(){
+  const isLoggedIn = sessionStorage.getItem('approved') === 'true';
+  if (!isLoggedIn) window.location.href = 'index.html';
+})();
 
-  const profile = {
-    name: (sessionStorage.getItem('name') || `${sessionStorage.getItem('first_name')||''} ${sessionStorage.getItem('last_name')||''}` || '').trim() || '—',
-    email: sessionStorage.getItem('email') || '—',
-    phone: sessionStorage.getItem('phone') || '—'
-  };
+const profile = {
+  name: (sessionStorage.getItem('name') || `${sessionStorage.getItem('first_name')||''} ${sessionStorage.getItem('last_name')||''}` || '').trim() || '—',
+  email: sessionStorage.getItem('email') || '—',
+  phone: sessionStorage.getItem('phone') || '—'
+};
 
-  let poolEntries = [];
-  try { poolEntries = JSON.parse(sessionStorage.getItem('pool_entries') || '[]'); } catch(_) {}
+let poolEntries = [];
+try { poolEntries = JSON.parse(sessionStorage.getItem('pool_entries') || '[]'); } catch(_) {}
 
-  let TEAM_OPTIONS = [];
-  try { TEAM_OPTIONS = JSON.parse(sessionStorage.getItem('team_options') || '[]'); } catch(_) {}
-  if (!Array.isArray(TEAM_OPTIONS) || TEAM_OPTIONS.length === 0) {
-    TEAM_OPTIONS = ["", "OUT","49ERS","BEARS","BENGALS","BILLS","BRONCOS","BROWNS","BUCCANEERS","CARDINALS",
-      "CHARGERS","CHIEFS","COLTS","COMMANDERS","COWBOYS","DOLPHINS","EAGLES","FALCONS","GIANTS","JAGUARS","JETS",
-      "LIONS","PACKERS","PANTHERS","PATRIOTS","RAIDERS","RAMS","RAVENS","SAINTS","SEAHAWKS","STEELERS","TEXANS","TITANS","VIKINGS"];
+let TEAM_OPTIONS = [];
+try { TEAM_OPTIONS = JSON.parse(sessionStorage.getItem('team_options') || '[]'); } catch(_) {}
+if (!Array.isArray(TEAM_OPTIONS) || TEAM_OPTIONS.length === 0) {
+  TEAM_OPTIONS = ["", "OUT","49ERS","BEARS","BENGALS","BILLS","BRONCOS","BROWNS","BUCCANEERS","CARDINALS",
+    "CHARGERS","CHIEFS","COLTS","COMMANDERS","COWBOYS","DOLPHINS","EAGLES","FALCONS","GIANTS","JAGUARS","JETS",
+    "LIONS","PACKERS","PANTHERS","PATRIOTS","RAIDERS","RAMS","RAVENS","SAINTS","SEAHAWKS","STEELERS","TEXANS","TITANS","VIKINGS"];
+}
+
+document.getElementById('userName').textContent = profile.name;
+document.getElementById('userEmail').textContent = profile.email;
+document.getElementById('userPhone').textContent = profile.phone;
+
+document.getElementById('signOutBtn').addEventListener('click', ()=>{
+  sessionStorage.clear();
+  window.location.href = 'index.html';
+});
+
+const entriesTbody = document.getElementById('entriesTableBody');
+const weeksWrap = document.getElementById('weeksWrap');
+const entryNotice = document.getElementById('entryNotice');
+const editingEntryLine = document.getElementById('editingEntryLine');
+
+let currentEntryDvuid = sessionStorage.getItem('current_entry_dvuid') || (poolEntries[0]?.dvuid || null);
+
+function isEntryDisabled(entry){
+  const s = (entry.status || '').toLowerCase();
+  return s === 'disqualified' || s === 'eliminated' || entry.disqualified === true;
+}
+
+function pill(status){
+  const span = document.createElement('span');
+  span.className = 'chip ' + (status || 'active').toString().toLowerCase();
+  span.textContent = status || 'Active';
+  return span;
+}
+
+function paidPill(val){
+  const span = document.createElement('span');
+  span.className = 'chip ' + (val ? 'active' : 'pending');
+  span.textContent = val ? 'Paid' : 'Unpaid';
+  return span;
+}
+
+function renderEntries(){
+  entriesTbody.innerHTML = '';
+  if (!poolEntries.length){
+    entryNotice.style.display = 'block';
+    entryNotice.textContent = 'No entries yet. If you just registered, your access may still be pending.';
+    return;
   }
+  entryNotice.style.display = 'none';
 
-  document.getElementById('userName').textContent = profile.name;
-  document.getElementById('userEmail').textContent = profile.email;
-  document.getElementById('userPhone').textContent = profile.phone;
+  for (const entry of poolEntries){
+    const tr = document.createElement('tr');
+    if (entry.dvuid === currentEntryDvuid) tr.classList.add('selected-row');
 
-  document.getElementById('signOutBtn').addEventListener('click', ()=>{
-    sessionStorage.clear();
-    window.location.href = 'index.html';
-  });
+    const tdName = document.createElement('td');
+    tdName.textContent = entry.lms_display_name || entry.entry_name || 'Entry';
 
-  const entriesTbody = document.getElementById('entriesTableBody');
-  const weeksWrap = document.getElementById('weeksWrap');
-  const entryNotice = document.getElementById('entryNotice');
-  const editingEntryLine = document.getElementById('editingEntryLine');
+    const tdStatus = document.createElement('td');
+    const st = (entry.status || (entry.disqualified ? 'Disqualified' : 'Active'));
+    tdStatus.appendChild(pill(st));
 
-  let currentEntryDvuid = sessionStorage.getItem('current_entry_dvuid') || (poolEntries[0]?.dvuid || null);
+    const tdPaid = document.createElement('td');
+    tdPaid.appendChild(paidPill(!!entry.paid_in_full));
 
-  function isEntryDisabled(entry){
-    const s = (entry.status || '').toLowerCase();
-    return s === 'disqualified' || s === 'eliminated' || entry.disqualified === true;
+    const tdActions = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.className = 'btn ' + (entry.dvuid === currentEntryDvuid ? 'secondary' : 'primary');
+    btn.textContent = entry.dvuid === currentEntryDvuid ? 'Selected' : 'View / Edit Picks';
+    btn.addEventListener('click', ()=>{
+      currentEntryDvuid = entry.dvuid;
+      sessionStorage.setItem('current_entry_dvuid', currentEntryDvuid);
+      renderEntries();
+      renderWeeks(entry);
+    });
+    tdActions.appendChild(btn);
+
+    tr.append(tdName, tdStatus, tdPaid, tdActions);
+    entriesTbody.appendChild(tr);
   }
+}
 
-  function pill(status){
-    const span = document.createElement('span');
-    span.className = 'chip ' + (status || 'active').toString().toLowerCase();
-    span.textContent = status || 'Active';
-    return span;
+// util: team already used in this entry (considering pending edits)
+function teamAlreadyUsed(entry, weekNo, team, pending){
+  if (!team || team === 'OUT') return false;
+  for (const ww of entry.weeks || []){
+    const value = (pending[ww.week_no] ?? ww.selection);
+    if (ww.week_no !== weekNo && value === team) return true;
   }
+  return false;
+}
 
-  function paidPill(val){
-    const span = document.createElement('span');
-    span.className = 'chip ' + (val ? 'active' : 'pending');
-    span.textContent = val ? 'Paid' : 'Unpaid';
-    return span;
-  }
+// shared save routine (both Save and Clear call this)
+async function saveSelection(entry, weekObj, newValue, pending, rebuildAllSelects) {
+  const apiSelection = (newValue === '') ? null : newValue;
 
-  function renderEntries(){
-    entriesTbody.innerHTML = '';
-    if (!poolEntries.length){
-      entryNotice.style.display = 'block';
-      entryNotice.textContent = 'No entries yet. If you just registered, your access may still be pending.';
-      return;
-    }
-    entryNotice.style.display = 'none';
-
-    for (const entry of poolEntries){
-      const tr = document.createElement('tr');
-      if (entry.dvuid === currentEntryDvuid) tr.classList.add('selected-row');
-
-      const tdName = document.createElement('td');
-      tdName.textContent = entry.lms_display_name || entry.entry_name || 'Entry';
-
-      const tdStatus = document.createElement('td');
-      const st = (entry.status || (entry.disqualified ? 'Disqualified' : 'Active'));
-      tdStatus.appendChild(pill(st));
-
-      const tdPaid = document.createElement('td');
-      tdPaid.appendChild(paidPill(!!entry.paid_in_full));
-
-      const tdActions = document.createElement('td');
-      const btn = document.createElement('button');
-      btn.className = 'btn ' + (entry.dvuid === currentEntryDvuid ? 'secondary' : 'primary');
-      btn.textContent = entry.dvuid === currentEntryDvuid ? 'Selected' : 'View / Edit Picks';
-      btn.addEventListener('click', ()=>{
-        currentEntryDvuid = entry.dvuid;
-        sessionStorage.setItem('current_entry_dvuid', currentEntryDvuid);
-        renderEntries();
-        renderWeeks(entry);
-      });
-      tdActions.appendChild(btn);
-
-      tr.append(tdName, tdStatus, tdPaid, tdActions);
-      entriesTbody.appendChild(tr);
-    }
-  }
-
-  // util: team already used in this entry (considering pending edits)
-  function teamAlreadyUsed(entry, weekNo, team, pending){
-    if (!team || team === 'OUT') return false;
-    for (const ww of entry.weeks || []){
-      const value = (pending[ww.week_no] ?? ww.selection);
-      if (ww.week_no !== weekNo && value === team) return true;
-    }
-    return false;
-  }
-
-  // shared save routine (both Save and Clear call this)
-  async function saveSelection(entry, weekObj, newValue, pending) {
-    // Normalize: blank => null for API
-    const apiSelection = (newValue === '') ? null : newValue;
-
-    // BYE + uniqueness only for real team values
-    if (apiSelection && apiSelection !== 'OUT') {
-      if (BYE_MAP[apiSelection] === weekObj.week_no) {
-        if (window.UI) UI.toast.error(`${apiSelection} is on a BYE in Week ${weekObj.week_no}.`);
-        return false;
-      }
-      if (teamAlreadyUsed(entry, weekObj.week_no, apiSelection, pending)) {
-        if (window.UI) UI.toast.error('You can only use each team once for this entry.');
-        return false;
-      }
-    }
-
-    try{
-      if (window.UI) UI.showLoader('Saving your pick…');
-      const payload = { dvuid: entry.dvuid, week_no: weekObj.week_no, selection: apiSelection };
-
-      const res = await fetch(SAVE_PICK_URL, {
-        method:'POST',
-        headers:{'content-type':'application/json'},
-        body: JSON.stringify(payload)
-      });
-      if(!res.ok) throw new Error('Save failed: HTTP '+res.status);
-
-      // Optimistic in-memory update
-      const updated = (poolEntries || []).map(pe=>{
-        if (pe.dvuid !== entry.dvuid) return pe;
-        const weeks2 = (pe.weeks || []).map(ww=>{
-          if (ww.week_no === weekObj.week_no) return { ...ww, selection: apiSelection };
-          return ww;
-        });
-        return { ...pe, weeks: weeks2 };
-      });
-      poolEntries = updated;
-      sessionStorage.setItem('pool_entries', JSON.stringify(updated));
-      return true;
-    }catch(err){
-      console.error(err);
-      if (window.UI) UI.toast.error('Could not save pick. Please try again.');
+  if (apiSelection && apiSelection !== 'OUT') {
+    if (BYE_MAP[apiSelection] === weekObj.week_no) {
+      if (window.UI) UI.toast.error(`${apiSelection} is on a BYE in Week ${weekObj.week_no}.`);
       return false;
-    }finally{
-      if (window.UI) UI.hideLoader();
+    }
+    if (teamAlreadyUsed(entry, weekObj.week_no, apiSelection, pending)) {
+      if (window.UI) UI.toast.error('You can only use each team once for this entry.');
+      return false;
     }
   }
 
-  function renderWeeks(entry){
-    weeksWrap.innerHTML = '';
+  try{
+    if (window.UI) UI.showLoader('Saving your pick…');
+    const payload = { dvuid: entry.dvuid, week_no: weekObj.week_no, selection: apiSelection };
 
-    const name = entry.lms_display_name || entry.entry_name || 'Entry';
-    editingEntryLine.textContent = `Editing Entry: ${name}`;
+    const res = await fetch(SAVE_PICK_URL, {
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error('Save failed: HTTP '+res.status);
 
-    if (isEntryDisabled(entry)){
-      const note = document.createElement('div');
-      note.className = 'notice';
-      note.textContent = 'This entry is disqualified/eliminated. Picks are locked for all weeks.';
-      weeksWrap.appendChild(note);
+    // Optimistic in-memory update
+    const updated = (poolEntries || []).map(pe=>{
+      if (pe.dvuid !== entry.dvuid) return pe;
+      const weeks2 = (pe.weeks || []).map(ww=>{
+        if (ww.week_no === weekObj.week_no) return { ...ww, selection: apiSelection };
+        return ww;
+      });
+      return { ...pe, weeks: weeks2 };
+    });
+    poolEntries = updated;
+    sessionStorage.setItem('pool_entries', JSON.stringify(updated));
+
+    // Rebuild ALL selects so released/claimed teams appear/disappear everywhere
+    if (typeof rebuildAllSelects === 'function') rebuildAllSelects();
+
+    return true;
+  }catch(err){
+    console.error(err);
+    if (window.UI) UI.toast.error('Could not save pick. Please try again.');
+    return false;
+  }finally{
+    if (window.UI) UI.hideLoader();
+  }
+}
+
+function renderWeeks(entry){
+  weeksWrap.innerHTML = '';
+
+  const name = entry.lms_display_name || entry.entry_name || 'Entry';
+  editingEntryLine.textContent = `Editing Entry: ${name}`;
+
+  if (isEntryDisabled(entry)){
+    const note = document.createElement('div');
+    note.className = 'notice';
+    note.textContent = 'This entry is disqualified/eliminated. Picks are locked for all weeks.';
+    weeksWrap.appendChild(note);
+  }
+
+  const weeks = Array.isArray(entry.weeks) ? [...entry.weeks] : [];
+  weeks.sort((a,b) => (a.week_no || 0) - (b.week_no || 0));
+
+  // Track in-flight selections so uniqueness applies even before saving.
+  const pending = {};
+  // Keep references to all selects so we can rebuild them together
+  const weekSelects = new Map();
+
+  // Helper to rebuild ALL selects after any change/save/clear
+  function rebuildAllSelects(excludeWeekNo = null) {
+    for (const [wk, obj] of weekSelects.entries()){
+      if (excludeWeekNo != null && wk === excludeWeekNo) continue;
+      const prev = obj.select.value;
+      obj.buildOptions();
+      // try to preserve the user's current choice after rebuild
+      obj.select.value = prev;
     }
+  }
 
-    const weeks = Array.isArray(entry.weeks) ? [...entry.weeks] : [];
-    weeks.sort((a,b) => (a.week_no || 0) - (b.week_no || 0));
+  for (const w of weeks){
+    const card = document.createElement('div');
+    card.className = 'week-card';
 
-    // Track in-flight selections so uniqueness applies even before saving.
-    const pending = {};
+    const title = document.createElement('div');
+    title.className = 'week-title';
+    title.textContent = `Week ${w.week_no ?? '—'}`;
 
-    for (const w of weeks){
-      const card = document.createElement('div');
-      card.className = 'week-card';
+    const select = document.createElement('select');
+    select.className = 'input';
+    select.style.maxWidth = '260px';
 
-      const title = document.createElement('div');
-      title.className = 'week-title';
-      title.textContent = `Week ${w.week_no ?? '—'}`;
+    const saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.className = 'btn primary';
+    saveBtn.textContent = 'Save Pick';
 
-      const select = document.createElement('select');
-      select.className = 'input';
-      select.style.maxWidth = '260px';
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'btn secondary';
+    clearBtn.textContent = 'Clear';
 
-      const saveBtn = document.createElement('button');
-      saveBtn.type = 'button';
-      saveBtn.className = 'btn primary';
-      saveBtn.textContent = 'Save Pick';
+    const success = document.createElement('span');
+    success.className = 'success-msg';
 
-      const clearBtn = document.createElement('button');
-      clearBtn.type = 'button';
-      clearBtn.className = 'btn secondary';
-      clearBtn.textContent = 'Clear';
+    const right = document.createElement('div');
+    right.className = 'lock-label chip ' + (w.locked ? 'lock' : 'active');
+    right.textContent = w.locked ? 'Locked' : (w.deadline_text || 'Open');
 
-      const success = document.createElement('span');
-      success.className = 'success-msg';
+    function buildOptions(){
+      const current = w.selection ?? '';
+      const all = TEAM_OPTIONS.slice();
+      select.innerHTML = '';
 
-      const right = document.createElement('div');
-      right.className = 'lock-label chip ' + (w.locked ? 'lock' : 'active');
-      right.textContent = w.locked ? 'Locked' : (w.deadline_text || 'Open');
+      // used teams excluding this week
+      const used = new Set();
+      for (const ww of weeks){
+        const v = (pending[ww.week_no] ?? ww.selection);
+        if (ww.week_no !== w.week_no && v && v !== 'OUT') used.add(v);
+      }
 
-      // Build options with BYE + uniqueness filtering (keep current saved value visible)
-      function buildOptions(){
-        const current = w.selection ?? '';
-        const all = TEAM_OPTIONS.slice(); // includes "", OUT, teams
-        select.innerHTML = '';
-
-        // Prepare "used teams" set (excluding this week)
-        const used = new Set();
-        for (const ww of weeks){
-          const v = (pending[ww.week_no] ?? ww.selection);
-          if (ww.week_no !== w.week_no && v && v !== 'OUT') used.add(v);
+      for (const t of all){
+        if (t === '' || t === 'OUT'){
+          const opt = document.createElement('option');
+          opt.value = t; opt.textContent = t === '' ? '— Select Team —' : 'OUT';
+          if (current === t || (current == null && t === '')) opt.selected = true;
+          select.appendChild(opt);
+          continue;
         }
-
-        for (const t of all){
-          // Always allow blank and OUT
-          if (t === '' || t === 'OUT'){
-            const opt = document.createElement('option');
-            opt.value = t; opt.textContent = t === '' ? '— Select Team —' : 'OUT';
-            if (current === t || (current == null && t === '')) opt.selected = true;
-            select.appendChild(opt);
-            continue;
-          }
-
-          const isCurrent = (t === current);
-          const isBye = (BYE_MAP[t] === w.week_no);
-          const usedElsewhere = used.has(t);
-
-          if (isCurrent || (!isBye && !usedElsewhere)){
-            const opt = document.createElement('option');
-            opt.value = t; opt.textContent = t;
-            if (isCurrent) opt.selected = true;
-            select.appendChild(opt);
-          }
+        const isCurrent = (t === current);
+        const isBye = (BYE_MAP[t] === w.week_no);
+        const usedElsewhere = used.has(t);
+        if (isCurrent || (!isBye && !usedElsewhere)){
+          const opt = document.createElement('option');
+          opt.value = t; opt.textContent = t;
+          if (isCurrent) opt.selected = true;
+          select.appendChild(opt);
         }
       }
-      buildOptions();
+    }
+    buildOptions();
 
-      const entryDisabled = isEntryDisabled(entry);
-      let initial = (w.selection ?? '');               // '' if null
-      let hasChanged = false;
-      const hasExistingSaved = initial !== '';
+    // register this select so others can rebuild when needed
+    weekSelects.set(w.week_no, {select, buildOptions});
 
-      // Clear button: only when there is an existing saved pick
-      clearBtn.style.display = hasExistingSaved ? 'inline-flex' : 'none';
-      clearBtn.disabled = !hasExistingSaved;
+    const entryDisabled = isEntryDisabled(entry);
+    let initial = (w.selection ?? '');               // '' if null
+    let hasChanged = false;
+    const hasExistingSaved = initial !== '';
 
-      if (entryDisabled){
-        select.disabled = true;
+    clearBtn.style.display = hasExistingSaved ? 'inline-flex' : 'none';
+    clearBtn.disabled = !hasExistingSaved;
+
+    if (entryDisabled){
+      select.disabled = true;
+      saveBtn.disabled = true;
+      clearBtn.disabled = true;
+      saveBtn.title = 'Entry cannot make picks';
+    } else if (w.locked){
+      select.disabled = true;
+      saveBtn.disabled = true;
+      clearBtn.disabled = true;
+      saveBtn.textContent = 'This week has been LOCKED';
+      saveBtn.title = 'This week has been LOCKED';
+    } else {
+      select.addEventListener('change', ()=>{
+        const newVal = select.value || '';
+        if (newVal && newVal !== 'OUT' && teamAlreadyUsed(entry, w.week_no, newVal, pending)){
+          if (window.UI) UI.toast.error('You can only use each team once for this entry.');
+          select.value = initial; // revert
+          return;
+        }
+        pending[w.week_no] = newVal;
+        success.textContent = '';
+        hasChanged = (newVal !== initial);
+        saveBtn.disabled = !hasChanged;
+
+        clearBtn.style.display = hasExistingSaved ? 'inline-flex' : 'none';
+        clearBtn.disabled = !hasExistingSaved;
+
+        // Rebuild OTHER selects so the change is reflected everywhere
+        rebuildAllSelects(w.week_no);
+      });
+
+      saveBtn.disabled = true;
+      saveBtn.addEventListener('click', async ()=>{
+        const chosen = select.value || ''; // '' means clear
+        const ok = await saveSelection(entry, w, chosen, pending, rebuildAllSelects);
+        if (!ok) return;
+
+        const chosenForUi = (chosen === '') ? '' : chosen;
+        pending[w.week_no] = chosenForUi;
+        initial = chosenForUi;
+        hasChanged = false;
         saveBtn.disabled = true;
-        clearBtn.disabled = true;
-        saveBtn.title = 'Entry cannot make picks';
-      } else if (w.locked){
-        select.disabled = true;
-        saveBtn.disabled = true;
-        clearBtn.disabled = true;
-        saveBtn.textContent = 'This week has been LOCKED';
-        saveBtn.title = 'This week has been LOCKED';
-      } else {
-        select.addEventListener('change', ()=>{
-          const newVal = select.value || '';
-          // Uniqueness guard only for real team values
-          if (newVal && newVal !== 'OUT' && teamAlreadyUsed(entry, w.week_no, newVal, pending)){
-            if (window.UI) UI.toast.error('You can only use each team once for this entry.');
-            select.value = initial; // revert
-            return;
-          }
-          pending[w.week_no] = newVal;
-          success.textContent = '';
-          hasChanged = (newVal !== initial);
-          saveBtn.disabled = !hasChanged;
+        success.textContent = chosen === '' ? 'Cleared' : 'Successfully Updated';
+        if (window.UI) UI.toast.success(success.textContent);
 
-          // Only show Clear when the original saved pick exists
-          clearBtn.style.display = hasExistingSaved ? 'inline-flex' : 'none';
-          clearBtn.disabled = !hasExistingSaved;
-
-          // Rebuild options to reflect uniqueness
-          buildOptions();
-          select.value = newVal;
-        });
-
-        saveBtn.disabled = true;
-        saveBtn.addEventListener('click', async ()=>{
-          const chosen = select.value || ''; // '' means clear
-          const ok = await saveSelection(entry, w, chosen, pending);
-          if (!ok) return;
-
-          // Update local UI state
-          const chosenForUi = (chosen === '') ? '' : chosen;
-          pending[w.week_no] = chosenForUi;
-          initial = chosenForUi;
-          hasChanged = false;
-          saveBtn.disabled = true;
-          success.textContent = chosen === '' ? 'Cleared' : 'Successfully Updated';
-          if (window.UI) UI.toast.success(success.textContent);
-
-          // After clear, reflect empty UI, hide Clear
-          if (chosen === '') {
-            select.value = '';
-            clearBtn.style.display = 'none';
-            clearBtn.disabled = true;
-          }
-          buildOptions();
-          select.value = chosenForUi;
-        });
-
-        clearBtn.addEventListener('click', async ()=>{
-          // Explicit clear (send null)
-          const ok = await saveSelection(entry, w, '', pending);
-          if (!ok) return;
-
-          // Update UI after clear
-          delete pending[w.week_no];
-          initial = '';
-          hasChanged = false;
-          saveBtn.disabled = true;
-          success.textContent = 'Cleared';
-          if (window.UI) UI.toast.success('Cleared');
+        if (chosen === '') {
           select.value = '';
           clearBtn.style.display = 'none';
           clearBtn.disabled = true;
-          buildOptions();
-          select.value = '';
-        });
-      }
+        }
+        // Also rebuild all selects to reflect released/claimed team
+        rebuildAllSelects();
+      });
 
-      card.append(title, select, saveBtn, clearBtn, success, right);
-      weeksWrap.appendChild(card);
+      clearBtn.addEventListener('click', async ()=>{
+        const ok = await saveSelection(entry, w, '', pending, rebuildAllSelects);
+        if (!ok) return;
+
+        delete pending[w.week_no];
+        initial = '';
+        hasChanged = false;
+        saveBtn.disabled = true;
+        success.textContent = 'Cleared';
+        if (window.UI) UI.toast.success('Cleared');
+        select.value = '';
+        clearBtn.style.display = 'none';
+        clearBtn.disabled = true;
+        rebuildAllSelects();
+      });
     }
+
+    card.append(title, select, saveBtn, clearBtn, success, right);
+    weeksWrap.appendChild(card);
   }
+}
 
-  function firstEntry(){ return poolEntries.find(e => e.dvuid === currentEntryDvuid) || poolEntries[0]; }
+function firstEntry(){ return poolEntries.find(e => e.dvuid === currentEntryDvuid) || poolEntries[0]; }
 
-  // Initial render
-  renderEntries();
-  if (firstEntry()) renderWeeks(firstEntry());
-  </script>
+// Initial render
+renderEntries();
+if (firstEntry()) renderWeeks(firstEntry());
+</script>
+
 </body>
 </html>
