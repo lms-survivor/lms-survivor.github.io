@@ -1,15 +1,15 @@
 /* ====== Design tokens (lighter theme) ====== */
 :root{
-  --bg:#f6f8fc;           /* app background */
-  --surface:#ffffff;      /* surfaces/cards/tables */
+  --bg:#f6f8fc;
+  --surface:#ffffff;
   --card:#ffffff;
-  --text:#1b2130;         /* primary text */
-  --muted:#66789e;        /* secondary text */
-  --primary:#3b82f6;      /* action blue */
+  --text:#1b2130;
+  --muted:#66789e;
+  --primary:#3b82f6;
   --success:#16a34a;
   --warning:#f59e0b;
   --error:#ef4444;
-  --line:#e5eaf2;         /* hairline borders */
+  --line:#e5eaf2;
   --radius:14px;
   --gap:14px;
   --shadow:0 8px 24px rgba(16,24,40,.08);
@@ -21,6 +21,7 @@ html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-u
 a{color:#2563eb;text-decoration:none} a:hover{text-decoration:underline}
 .muted{color:var(--muted)}
 .container{max-width:1100px;margin:auto;padding:24px}
+@media (max-width:600px){ .container{padding:16px} }
 
 /* ====== Header/Footer ====== */
 header{background:linear-gradient(180deg,#ffffff,#f2f6ff);border-bottom:1px solid var(--line);padding:22px}
@@ -34,10 +35,11 @@ footer{border-top:1px solid var(--line);background:transparent;padding:20px;text
 footer img{width:72px;background:#fff;border-radius:10px;padding:5px;margin-top:8px;border:1px solid var(--line)}
 
 /* ====== Cards & Sections ====== */
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;overflow-x:auto; /* <-- enables inner horizontal scroll when needed */ }
 .section{margin:24px 0}
 .row{display:flex;gap:var(--gap);flex-wrap:wrap}
 .col{flex:1 1 320px}
+@media (max-width:600px){ .row>.col{flex:1 1 100%} }
 
 /* ====== Forms ====== */
 label{display:block;margin:10px 0 6px;color:#2a3954}
@@ -50,17 +52,27 @@ label{display:block;margin:10px 0 6px;color:#2a3954}
 
 /* Buttons */
 .btn{
-  display:inline-flex;align-items:center;gap:8px;border-radius:12px;border:1px solid transparent;
-  padding:10px 14px;font-weight:700;cursor:pointer;transition:.2s ease
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:1px solid transparent;
+  padding:10px 14px;font-weight:700;cursor:pointer;transition:.2s ease;white-space:nowrap;font-size:14px
 }
 .btn.primary{background:var(--primary);color:#fff}
 .btn.secondary{background:#fff;border-color:#cbd5e1;color:#1b2130}
 .btn.danger{background:#dc2626;color:#fff}
 .btn[disabled], .btn.disabled{opacity:.55;cursor:not-allowed}
 
-/* ====== Tables ====== */
-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-th, td{padding:12px 14px;border-bottom:1px solid var(--line)}
+/* ====== Tables (responsive-friendly) ====== */
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+  table-layout:fixed;           /* prevent runaway col growth */
+  min-width:560px;              /* allows inner scroll on very small screens */
+}
+th, td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
 thead th{background:#eef3ff;color:#334155;text-align:left;font-weight:700}
 tbody tr:hover{background:#f9fbff}
 
@@ -97,14 +109,29 @@ tbody tr:hover{background:#f9fbff}
 /* ====== Picks UI ====== */
 .week-card{
   background:var(--surface);border:1px solid var(--line);border-radius:12px;
-  padding:14px;display:flex;gap:12px;align-items:center;margin-bottom:10px
+  padding:14px;display:flex;gap:12px;align-items:center;margin-bottom:10px;flex-wrap:wrap; /* wrap on small screens */
 }
-.week-title{font-weight:800}
+.week-title{font-weight:800;flex:0 0 auto}
 .lock-label{margin-left:auto}
 .success-msg{color:var(--success);font-weight:800;margin-left:12px}
-.notice{background:#f8fbff;border:1px dashed #cfe0ff;border-radius:12px;padding:12px;color:#1b2130}
 
 /* Selected entry highlight + inline button spacing */
 .selected-row{background:#eef4ff !important}
 .selected-row td{border-bottom-color:#dbe6ff !important}
 .week-card .btn + .btn{margin-left:8px}
+
+/* Make Weekly Picks comfortable on phones */
+.week-card .input{flex:1 1 260px;min-width:220px}
+@media (max-width:600px){
+  .week-card{gap:10px}
+  .week-title{flex:1 1 100%}                 /* week label on its own line */
+  .week-card .input{flex:1 1 100%;min-width:100%} /* full-width select so team text is visible */
+  .week-card .btn{flex:1 1 calc(50% - 5px)}  /* buttons sit side by side below the select */
+  .lock-label{order:99;flex:1 1 100%;text-align:right}
+  .success-msg{order:98;flex:1 1 100%;text-align:left;margin-left:0}
+}
+
+/* Optional: tighten table padding slightly on small screens */
+@media (max-width:480px){
+  th, td{padding:10px 12px}
+}
